@@ -50,11 +50,4 @@ public class AlunoController {
 
         return ResponseFactory.success(responseData);
     }
-
-    @PostMapping("/login")
-    public ResponseEntity<ApiResponse<LoginResponseDTO>> login(@RequestBody @Valid LoginRequestDTO dto) {
-        LoginResponseDTO responseData = alunoService.login(dto);
-
-        return ResponseFactory.success(responseData);
-    }
 }
