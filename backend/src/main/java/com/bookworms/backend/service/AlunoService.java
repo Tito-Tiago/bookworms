@@ -68,4 +68,12 @@ public class AlunoService {
                 .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado."));
         return new AlunoResponseDTO(aluno);
     }
+
+    public void excluirAluno(UUID id) {
+        if (!alunoRepository.existsById(id)) {
+            throw new EntityNotFoundException("Aluno não encontrado para exclusão.");
+        }
+
+        alunoRepository.deleteById(id);
+    }
 }
