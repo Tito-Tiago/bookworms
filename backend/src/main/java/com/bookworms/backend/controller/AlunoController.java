@@ -1,8 +1,6 @@
 package com.bookworms.backend.controller;
 
-import com.bookworms.backend.dto.aluno.AlunoCadastroDTO;
-import com.bookworms.backend.dto.aluno.AlunoResponseDTO;
-import com.bookworms.backend.dto.aluno.AlunoUpdateDTO;
+import com.bookworms.backend.dto.aluno.*;
 import com.bookworms.backend.factory.ResponseFactory;
 import com.bookworms.backend.response.ApiResponse;
 import com.bookworms.backend.service.AlunoService;
@@ -49,6 +47,13 @@ public class AlunoController {
         alunoService.excluirAluno(id);
 
         Map<String, String> responseData = Map.of("mensagem", "Aluno excluído com sucesso.");
+
+        return ResponseFactory.success(responseData);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<LoginResponseDTO>> login(@RequestBody @Valid LoginRequestDTO dto) {
+        LoginResponseDTO responseData = alunoService.login(dto);
 
         return ResponseFactory.success(responseData);
     }

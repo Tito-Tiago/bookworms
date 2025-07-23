@@ -3,13 +3,18 @@ package com.bookworms.backend.service;
 import com.bookworms.backend.dto.aluno.AlunoCadastroDTO;
 import com.bookworms.backend.dto.aluno.AlunoResponseDTO;
 import com.bookworms.backend.dto.aluno.AlunoUpdateDTO;
+import com.bookworms.backend.dto.aluno.LoginRequestDTO;
+import com.bookworms.backend.dto.aluno.LoginResponseDTO;
 import com.bookworms.backend.model.Aluno;
 import com.bookworms.backend.repository.AlunoRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 @Service
@@ -17,6 +22,8 @@ import java.util.UUID;
 public class AlunoService {
 
     private final AlunoRepository alunoRepository;
+    private final TokenService tokenService;
+    private final AuthenticationManager authenticationManager;
     private static final String FOTO_PERFIL_PADRAO_URL = "https://pin.it/Cg3X3D8YE";
 
     public AlunoResponseDTO cadastrarAluno(AlunoCadastroDTO dto) {
@@ -31,12 +38,22 @@ public class AlunoService {
                 dto.getUsername(),
                 dto.getSenha()
         );
-
         novoAluno.setFotoPerfilUrl(FOTO_PERFIL_PADRAO_URL);
-
         Aluno alunoSalvo = alunoRepository.save(novoAluno);
-
         return new AlunoResponseDTO(alunoSalvo);
+    }
+
+    public LoginResponseDTO login(LoginRequestDTO dto) {
+        var usernamePassword = new UsernamePasswordAuthenticationToken(dto.getLogin(), dto.getSenha());
+        var auth = this.authenticationManager.authenticate(usernamePassword);
+
+        Aluno alunoAutenticado = alunoRepository.findByEmailOrUsername(auth.getName(), auth.getName())
+                .orElseThrow(() -> new EntityNotFoundException("Erro ao recuperar dados do aluno após login."));
+
+        var token = tokenService.generateToken(alunoAutenticado);
+        var alunoResponse = new AlunoResponseDTO(alunoAutenticado);
+
+        return new LoginResponseDTO(token, alunoResponse);
     }
 
     public AlunoResponseDTO atualizarAluno(UUID id, AlunoUpdateDTO dto) {
