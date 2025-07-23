@@ -4,7 +4,6 @@ import com.bookworms.backend.dto.aluno.AlunoCadastroDTO;
 import com.bookworms.backend.dto.aluno.AlunoResponseDTO;
 import com.bookworms.backend.dto.aluno.AlunoUpdateDTO;
 import com.bookworms.backend.factory.ResponseFactory;
-import com.bookworms.backend.model.Aluno;
 import com.bookworms.backend.response.ApiResponse;
 import com.bookworms.backend.service.AlunoService;
 
@@ -14,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -42,5 +42,14 @@ public class AlunoController {
     public ResponseEntity<ApiResponse<AlunoResponseDTO>> visualizar(@PathVariable UUID id) {
         AlunoResponseDTO aluno = alunoService.buscarAlunoPorId(id);
         return ResponseFactory.success(aluno);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Map<String, String>>> excluir(@PathVariable UUID id) {
+        alunoService.excluirAluno(id);
+
+        Map<String, String> responseData = Map.of("mensagem", "Aluno excluído com sucesso.");
+
+        return ResponseFactory.success(responseData);
     }
 }
