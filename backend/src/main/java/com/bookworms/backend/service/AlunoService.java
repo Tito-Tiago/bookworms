@@ -2,6 +2,7 @@ package com.bookworms.backend.service;
 
 import com.bookworms.backend.dto.aluno.AlunoCadastroDTO;
 import com.bookworms.backend.dto.aluno.AlunoResponseDTO;
+import com.bookworms.backend.dto.aluno.AlunoUpdateDTO;
 import com.bookworms.backend.model.Aluno;
 import com.bookworms.backend.repository.AlunoRepository;
 
@@ -17,6 +18,7 @@ public class AlunoService {
 
     private final AlunoRepository alunoRepository;
     private static final String FOTO_PERFIL_PADRAO_URL = "https://pin.it/Cg3X3D8YE";
+
     public AlunoResponseDTO cadastrarAluno(AlunoCadastroDTO dto) {
         alunoRepository.findByEmailOrUsername(dto.getEmail(), dto.getUsername())
                 .ifPresent(aluno -> {
@@ -37,7 +39,33 @@ public class AlunoService {
         return new AlunoResponseDTO(alunoSalvo);
     }
 
-    public Aluno buscarAluno(UUID id) {
-        return alunoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado."));
+    public AlunoResponseDTO atualizarAluno(UUID id, AlunoUpdateDTO dto) {
+        Aluno aluno = alunoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado."));
+
+        if (dto.getNomeCompleto() != null && !dto.getNomeCompleto().isBlank()) {
+            aluno.setNomeCompleto(dto.getNomeCompleto());
+        }
+
+        if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
+            aluno.setEmail(dto.getEmail());
+        }
+
+        if (dto.getUsername() != null && !dto.getUsername().isBlank()) {
+            aluno.setUsername(dto.getUsername());
+        }
+        if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
+            aluno.setSenha(dto.getSenha());
+        }
+
+        Aluno alunoAtualizado = alunoRepository.save(aluno);
+
+        return new AlunoResponseDTO(alunoAtualizado);
+    }
+
+    public AlunoResponseDTO buscarAlunoPorId(UUID id) {
+        Aluno aluno = alunoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado."));
+        return new AlunoResponseDTO(aluno);
     }
 }
