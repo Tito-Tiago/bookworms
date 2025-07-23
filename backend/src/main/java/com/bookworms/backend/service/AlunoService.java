@@ -18,6 +18,7 @@ public class AlunoService {
 
     private final AlunoRepository alunoRepository;
     private static final String FOTO_PERFIL_PADRAO_URL = "https://pin.it/Cg3X3D8YE";
+
     public AlunoResponseDTO cadastrarAluno(AlunoCadastroDTO dto) {
         alunoRepository.findByEmailOrUsername(dto.getEmail(), dto.getUsername())
                 .ifPresent(aluno -> {
@@ -60,5 +61,11 @@ public class AlunoService {
         Aluno alunoAtualizado = alunoRepository.save(aluno);
 
         return new AlunoResponseDTO(alunoAtualizado);
+    }
+
+    public AlunoResponseDTO buscarAlunoPorId(UUID id) {
+        Aluno aluno = alunoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado."));
+        return new AlunoResponseDTO(aluno);
     }
 }

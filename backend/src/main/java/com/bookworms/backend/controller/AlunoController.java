@@ -4,6 +4,7 @@ import com.bookworms.backend.dto.aluno.AlunoCadastroDTO;
 import com.bookworms.backend.dto.aluno.AlunoResponseDTO;
 import com.bookworms.backend.dto.aluno.AlunoUpdateDTO;
 import com.bookworms.backend.factory.ResponseFactory;
+import com.bookworms.backend.model.Aluno;
 import com.bookworms.backend.response.ApiResponse;
 import com.bookworms.backend.service.AlunoService;
 
@@ -35,5 +36,11 @@ public class AlunoController {
 
         AlunoResponseDTO alunoAtualizado = alunoService.atualizarAluno(id, dto);
         return ResponseFactory.success(alunoAtualizado);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<AlunoResponseDTO>> visualizar(@PathVariable UUID id) {
+        AlunoResponseDTO aluno = alunoService.buscarAlunoPorId(id);
+        return ResponseFactory.success(aluno);
     }
 }
