@@ -5,8 +5,11 @@ import com.bookworms.backend.dto.aluno.AlunoResponseDTO;
 import com.bookworms.backend.model.Aluno;
 import com.bookworms.backend.repository.AlunoRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -32,5 +35,9 @@ public class AlunoService {
         Aluno alunoSalvo = alunoRepository.save(novoAluno);
 
         return new AlunoResponseDTO(alunoSalvo);
+    }
+
+    public Aluno buscarAluno(UUID id) {
+        return alunoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado."));
     }
 }
