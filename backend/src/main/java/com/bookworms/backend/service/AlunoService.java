@@ -2,11 +2,15 @@ package com.bookworms.backend.service;
 
 import com.bookworms.backend.dto.aluno.AlunoCadastroDTO;
 import com.bookworms.backend.dto.aluno.AlunoResponseDTO;
+import com.bookworms.backend.dto.aluno.AlunoUpdateDTO;
 import com.bookworms.backend.model.Aluno;
 import com.bookworms.backend.repository.AlunoRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -32,5 +36,29 @@ public class AlunoService {
         Aluno alunoSalvo = alunoRepository.save(novoAluno);
 
         return new AlunoResponseDTO(alunoSalvo);
+    }
+
+    public AlunoResponseDTO atualizarAluno(UUID id, AlunoUpdateDTO dto) {
+        Aluno aluno = alunoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado."));
+
+        if (dto.getNomeCompleto() != null && !dto.getNomeCompleto().isBlank()) {
+            aluno.setNomeCompleto(dto.getNomeCompleto());
+        }
+
+        if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
+            aluno.setEmail(dto.getEmail());
+        }
+
+        if (dto.getUsername() != null && !dto.getUsername().isBlank()) {
+            aluno.setUsername(dto.getUsername());
+        }
+        if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
+            aluno.setSenha(dto.getSenha());
+        }
+
+        Aluno alunoAtualizado = alunoRepository.save(aluno);
+
+        return new AlunoResponseDTO(alunoAtualizado);
     }
 }
