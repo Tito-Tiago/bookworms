@@ -7,9 +7,9 @@ import com.bookworms.backend.repository.LivroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class LivroService {
@@ -43,12 +43,26 @@ public class LivroService {
     }
 
     public List<LivroResponseDTO> getLivros() {
-        List<Livro> livros = livroRepository.findAll();
-        List<LivroResponseDTO> dtos = new ArrayList<>();
-        for (Livro livro : livros) {
-            dtos.add(new LivroResponseDTO(livro));
-        }
-        return dtos;
+        return livroRepository.findAll().stream()
+                .map(LivroResponseDTO::new)
+                .collect(Collectors.toList());
     }
+
+    public void deletarLivro(UUID id){
+        Livro livro = livroRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Livro não encontrado"));
+
+        livroRepository.delete(livro);
+    }
+
+    public LivroResponseDTO like(UUID id) {
+        Livro livro = livroRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Livro não encontrado"));
+        livro.setLikes(livro.getLikes() + 1);
+        livroRepository.save(livro);
+        return new LivroResponseDTO(livro);
+    }
+
+    
 
 }
