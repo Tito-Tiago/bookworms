@@ -2,8 +2,11 @@ package com.bookworms.backend.dto.livro;
 
 import com.bookworms.backend.model.Livro;
 
+import lombok.Data;
+
 import java.util.UUID;
 
+@Data
 public class LivroResponseDTO {
     private UUID id;
     private String titulo;
