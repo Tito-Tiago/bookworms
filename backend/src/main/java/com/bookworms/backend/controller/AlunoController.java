@@ -1,8 +1,6 @@
 package com.bookworms.backend.controller;
 
-import com.bookworms.backend.dto.aluno.AlunoCadastroDTO;
-import com.bookworms.backend.dto.aluno.AlunoResponseDTO;
-import com.bookworms.backend.dto.aluno.AlunoUpdateDTO;
+import com.bookworms.backend.dto.aluno.*;
 import com.bookworms.backend.factory.ResponseFactory;
 import com.bookworms.backend.response.ApiResponse;
 import com.bookworms.backend.service.AlunoService;
