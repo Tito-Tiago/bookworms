@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
 
@@ -24,7 +24,7 @@ public class AlunoService {
     private final AlunoRepository alunoRepository;
     private final TokenService tokenService;
     private final AuthenticationManager authenticationManager;
-    private static final String FOTO_PERFIL_PADRAO_URL = "https://pin.it/Cg3X3D8YE";
+    private static final String FOTO_PERFIL_PADRAO_URL = "https://images.unsplash.com/photo-1695457601176-b779cf426428?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
 
     public AlunoResponseDTO cadastrarAluno(AlunoCadastroDTO dto) {
         alunoRepository.findByEmailOrUsername(dto.getEmail(), dto.getUsername())
@@ -45,7 +45,8 @@ public class AlunoService {
 
     public LoginResponseDTO login(LoginRequestDTO dto) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(dto.getLogin(), dto.getSenha());
-        var auth = this.authenticationManager.authenticate(usernamePassword);
+
+        Authentication auth = this.authenticationManager.authenticate(usernamePassword);
 
         Aluno alunoAutenticado = alunoRepository.findByEmailOrUsername(auth.getName(), auth.getName())
                 .orElseThrow(() -> new EntityNotFoundException("Erro ao recuperar dados do aluno após login."));
