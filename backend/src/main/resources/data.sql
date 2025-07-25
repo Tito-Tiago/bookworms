@@ -1,6 +1,6 @@
 INSERT INTO alunos (id, nome_completo, email, username, senha, foto_perfil_url) VALUES
-(RANDOM_UUID(), 'Laura Mendes', 'laura.mendes@email.com', 'lauramendes', 'senha123', 'https://pin.it/Cg3X3D8YE'),
-(RANDOM_UUID(), 'Pedro Rocha', 'pedro.rocha@email.com', 'pedrorocha', 'senha456', 'https://pin.it/Cg3X3D8YE'),
-(RANDOM_UUID(), 'Beatriz Lima', 'beatriz.lima@email.com', 'bialima', 'senha789', 'https://pin.it/Cg3X3D8YE'),
-(RANDOM_UUID(), 'Gabriel Faria', 'gabriel.faria@email.com', 'gabrielf', 'senha101', 'https://pin.it/Cg3X3D8YE'),
-(RANDOM_UUID(), 'Júlia Azevedo', 'julia.azevedo@email.com', 'juhazevedo', 'senha112', 'https://pin.it/Cg3X3D8YE');
+(RANDOM_UUID(), 'Laura Mendes', 'laura.mendes@email.com', 'lauramendes', 'senha123', 'https://images.unsplash.com/photo-1695457601176-b779cf426428?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'),
+(RANDOM_UUID(), 'Pedro Rocha', 'pedro.rocha@email.com', 'pedrorocha', 'senha456', 'https://images.unsplash.com/photo-1695457601176-b779cf426428?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'),
+(RANDOM_UUID(), 'Beatriz Lima', 'beatriz.lima@email.com', 'bialima', 'senha789', 'https://images.unsplash.com/photo-1695457601176-b779cf426428?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'),
+(RANDOM_UUID(), 'Gabriel Faria', 'gabriel.faria@email.com', 'gabrielf', 'senha101', 'https://images.unsplash.com/photo-1695457601176-b779cf426428?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'),
+(RANDOM_UUID(), 'Júlia Azevedo', 'julia.azevedo@email.com', 'juhazevedo', 'senha112', 'https://images.unsplash.com/photo-1695457601176-b779cf426428?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
