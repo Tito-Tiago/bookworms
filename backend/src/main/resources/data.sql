@@ -4,3 +4,9 @@ INSERT INTO alunos (id, nome_completo, email, username, senha, foto_perfil_url) 
 (RANDOM_UUID(), 'Beatriz Lima', 'beatriz.lima@email.com', 'bialima', 'senha789', 'https://images.unsplash.com/photo-1695457601176-b779cf426428?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'),
 (RANDOM_UUID(), 'Gabriel Faria', 'gabriel.faria@email.com', 'gabrielf', 'senha101', 'https://images.unsplash.com/photo-1695457601176-b779cf426428?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'),
 (RANDOM_UUID(), 'Júlia Azevedo', 'julia.azevedo@email.com', 'juhazevedo', 'senha112', 'https://images.unsplash.com/photo-1695457601176-b779cf426428?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+
+INSERT INTO livros (id, titulo, sinopse, genero, autor, foto_capa_url, likes, soma_avaliacoes, num_avaliacoes) VALUES
+(RANDOM_UUID(), 'O Senhor dos Anéis', 'Uma grande aventura em um mundo de fantasia.', 'Fantasia', 'J.R.R. Tolkien', 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn.dc5.ro%2Fimg-prod%2F1728045377-5.jpeg&f=1&nofb=1&ipt=c250928c058af85391c169f0bf5b7f407fc678e3cf9adea25694fb1282bb4aa6', 10, 45, 10),
+(RANDOM_UUID(), 'O Hobbit', 'A história de um hobbit que parte em uma aventura inesperada.', 'Fantasia', 'J.R.R. Tolkien', 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn.dc5.ro%2Fimg-prod%2F1728045377-5.jpeg&f=1&nofb=1&ipt=c250928c058af85391c169f0bf5b7f407fc678e3cf9adea25694fb1282bb4aa6', 5, 20, 5),
+(RANDOM_UUID(), 'O Silmarillion', 'A história da criação da Terra-média.', 'Fantasia', 'J.R.R. Tolkien', 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn.dc5.ro%2Fimg-prod%2F1728045377-5.jpeg&f=1&nofb=1&ipt=c250928c058af85391c169f0bf5b7f407fc678e3cf9adea25694fb1282bb4aa6', 2, 8, 2);
+

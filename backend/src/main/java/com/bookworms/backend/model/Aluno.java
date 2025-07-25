@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -30,6 +32,11 @@ public class Aluno {
 
     @Column(name = "foto_perfil_url")
     private String fotoPerfilUrl;
+
+    @OneToMany(mappedBy = "aluno", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Avaliacao> avaliacoes = new ArrayList<>();
+
+    
 
     public Aluno(String nomeCompleto, String email, String username, String senha) {
         this.nomeCompleto = nomeCompleto;
