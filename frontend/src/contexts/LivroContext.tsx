@@ -175,7 +175,8 @@ export const LivroProvider: React.FC<{
     try {
       await apiService.createAvaliacao({
         livroId,
-        numEstrelas,
+        alunoId: usuarioAtual.id,
+        rating: numEstrelas,
         comentario
       });
       // Recarregar o livro para pegar a avaliação atualizada
@@ -193,6 +194,7 @@ export const LivroProvider: React.FC<{
     try {
       await apiService.createResposta({
         avaliacaoId,
+        alunoId: usuarioAtual.id,
         comentario
       });
       // Recarregar todos os livros para atualizar as respostas
