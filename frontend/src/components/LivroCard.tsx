@@ -29,14 +29,11 @@ const CartaoLivro: React.FC<LivroCardProps> = ({
     e.preventDefault();
     if (!usuarioAtual) return;
     
-    // Atualizar UI imediatamente
     toggleLikeLocal(id, 'livro');
     
     try {
-      // Sincronizar com backend
       await alternarCurtida(id);
     } catch (error) {
-      // Reverter mudança local em caso de erro
       toggleLikeLocal(id, 'livro');
       console.error('Erro ao curtir livro:', error);
     }

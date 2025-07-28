@@ -10,14 +10,12 @@ const Inicio: React.FC = () => {
   const [livrosFiltrados, setLivrosFiltrados] = useState(livros);
   const location = useLocation();
 
-  // Analisar consulta de pesquisa da URL se existir
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const consulta = params.get('search') || '';
     setConsultaPesquisa(consulta);
   }, [location.search]);
 
-  // Filtrar livros com base na consulta de pesquisa
   useEffect(() => {
     if (consultaPesquisa) {
       const consulta = consultaPesquisa.toLowerCase();
@@ -27,7 +25,6 @@ const Inicio: React.FC = () => {
       );
       setLivrosFiltrados(filtrados);
     } else {
-      // Ordenar livros por quantidade de interações (likes + avaliações + respostas)
       const ordenados = [...livros].sort((a, b) => {
         const interacoesA = a.likes + a.avaliacoes.length + 
           a.avaliacoes.reduce((soma, avaliacao) => soma + avaliacao.replies.length, 0);
@@ -41,7 +38,6 @@ const Inicio: React.FC = () => {
 
   const lidarPesquisa = (e: React.FormEvent) => {
     e.preventDefault();
-    // A pesquisa já é tratada pelo useEffect
   };
 
   if (loading) {

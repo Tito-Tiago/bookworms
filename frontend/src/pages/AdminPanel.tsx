@@ -66,7 +66,6 @@ const PainelAdministrativo: React.FC = () => {
 
   const lidarPesquisa = (e: React.FormEvent) => {
     e.preventDefault();
-    // A pesquisa já é tratada pelos livros filtrados
   };
   return <div className="max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-8">

@@ -18,13 +18,11 @@ const LikeButton: React.FC<LikeButtomProps> = ({ itemId, initialLikes, type, onL
   const handleLike = async () => {
     if (!usuarioAtual) return;
     
-    // Atualizar UI imediatamente
     toggleLikeLocal(itemId, type);
     
     try {
       await onLike(itemId);
     } catch (error) {
-      // Reverter mudança local em caso de erro
       toggleLikeLocal(itemId, type);
       console.error(`Erro ao curtir ${type}:`, error);
     }

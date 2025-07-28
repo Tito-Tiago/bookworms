@@ -73,13 +73,11 @@ const DetalheLivro: React.FC = () => {
       return;
     }
     
-    // Atualizar UI imediatamente
     toggleLikeLocal(livro.id, 'livro');
     
     try {
       await alternarCurtida(livro.id);
     } catch (error) {
-      // Reverter mudança local em caso de erro
       toggleLikeLocal(livro.id, 'livro');
       console.error('Erro ao curtir livro:', error);
     }
@@ -304,7 +302,6 @@ const DetalheLivro: React.FC = () => {
                     </div>
                   )}
                   
-                  {/* Formulário de resposta */}
                   {mostrarFormResposta[avaliacao.id] && usuarioAtual && (
                     <div className="mt-3 flex">
                       <input

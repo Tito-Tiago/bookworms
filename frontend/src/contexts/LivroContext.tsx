@@ -119,7 +119,6 @@ export const LivroProvider: React.FC<{
     }
   };
 
-  // Carregar livros na inicialização
   useEffect(() => {
     carregarLivros();
   }, []);
@@ -166,7 +165,6 @@ export const LivroProvider: React.FC<{
   const alternarCurtida = async (livroId: string) => {
     if (!usuarioAtual) return;
     
-    // Verificar se o livro já foi curtido pelo usuário
     const likedItems = localStorage.getItem('liked_livros');
     const parsedLikes = likedItems ? JSON.parse(likedItems) : [];
     const isLiked = parsedLikes.includes(livroId);
@@ -174,10 +172,8 @@ export const LivroProvider: React.FC<{
     try {
       let livroAtualizado;
       if (isLiked) {
-        // Remover like
         livroAtualizado = await apiService.unlikeLivro(livroId);
       } else {
-        // Adicionar like
         livroAtualizado = await apiService.likeLivro(livroId);
       }
       
@@ -201,7 +197,6 @@ export const LivroProvider: React.FC<{
         rating: numEstrelas,
         comentario
       });
-      // Recarregar o livro para pegar a avaliação atualizada
       await carregarLivro(livroId);
     } catch (err) {
       setError('Erro ao adicionar avaliação');
@@ -219,7 +214,6 @@ export const LivroProvider: React.FC<{
         alunoId: usuarioAtual.id,
         comentario
       });
-      // Recarregar todos os livros para atualizar as respostas
       await carregarLivros();
     } catch (err) {
       setError('Erro ao adicionar resposta');
@@ -231,7 +225,6 @@ export const LivroProvider: React.FC<{
   const alternarCurtidaAvaliacao = async (avaliacaoId: string) => {
     if (!usuarioAtual) return;
     
-    // Verificar se a avaliação já foi curtida pelo usuário
     const likedItems = localStorage.getItem('liked_avaliacaos');
     const parsedLikes = likedItems ? JSON.parse(likedItems) : [];
     const isLiked = parsedLikes.includes(avaliacaoId);
@@ -242,7 +235,6 @@ export const LivroProvider: React.FC<{
       } else {
         await apiService.likeAvaliacao(avaliacaoId);
       }
-      // Recarregar todos os livros para atualizar as curtidas
       await carregarLivros();
     } catch (err) {
       setError('Erro ao curtir avaliação');
@@ -254,7 +246,6 @@ export const LivroProvider: React.FC<{
   const alternarCurtidaResposta = async (respostaId: string) => {
     if (!usuarioAtual) return;
     
-    // Verificar se a resposta já foi curtida pelo usuário
     const likedItems = localStorage.getItem('liked_respostas');
     const parsedLikes = likedItems ? JSON.parse(likedItems) : [];
     const isLiked = parsedLikes.includes(respostaId);
@@ -265,7 +256,6 @@ export const LivroProvider: React.FC<{
       } else {
         await apiService.likeResposta(respostaId);
       }
-      // Recarregar todos os livros para atualizar as curtidas
       await carregarLivros();
     } catch (err) {
       setError('Erro ao curtir resposta');
@@ -274,17 +264,14 @@ export const LivroProvider: React.FC<{
     }
   };
 
-  // Funções para gerenciamento de likes
   const getLikeState = (itemId: string, initialLikes: number, type: 'livro' | 'avaliacao' | 'resposta'): LikeState => {
     const key = `${type}-${itemId}`;
     
-    // Verificar se já temos o estado em cache
     const cachedState = likeStates.get(key);
     if (cachedState) {
       return cachedState;
     }
     
-    // Verificar se o item foi curtido pelo usuário atual no localStorage
     const likedItems = localStorage.getItem(`liked_${type}s`);
     const parsedLikes = likedItems ? JSON.parse(likedItems) : [];
     const isLiked = parsedLikes.includes(itemId);
@@ -294,7 +281,6 @@ export const LivroProvider: React.FC<{
       likesCount: initialLikes
     };
     
-    // Armazenar no cache
     setLikeStates(prev => new Map(prev).set(key, newState));
     
     return newState;
@@ -314,12 +300,10 @@ export const LivroProvider: React.FC<{
     let newCount: number;
 
     if (parsedLikes.includes(itemId)) {
-      // Remove like
       newLikes = parsedLikes.filter((id: string) => id !== itemId);
       newIsLiked = false;
       newCount = Math.max(0, currentState.likesCount - 1);
     } else {
-      // Add like
       newLikes = [...parsedLikes, itemId];
       newIsLiked = true;
       newCount = currentState.likesCount + 1;
