@@ -64,6 +64,12 @@ class ApiService {
     });
   }
 
+  async unlikeLivro(id: string) {
+    return this.request<any>(`/livros/${id}/like`, {
+      method: 'DELETE',
+    });
+  }
+
   // Avaliações
   async createAvaliacao(avaliacao: any) {
     return this.request<any>('/avaliacoes', {
@@ -78,6 +84,12 @@ class ApiService {
     });
   }
 
+  async unlikeAvaliacao(id: string) {
+    return this.request<any>(`/avaliacoes/${id}/like`, {
+      method: 'DELETE',
+    });
+  }
+
   // Respostas
   async createResposta(resposta: any) {
     return this.request<any>('/avaliacoes/respostas', {
@@ -89,6 +101,12 @@ class ApiService {
   async likeResposta(id: string) {
     return this.request<any>(`/avaliacoes/respostas/${id}/like`, {
       method: 'POST',
+    });
+  }
+
+  async unlikeResposta(id: string) {
+    return this.request<any>(`/avaliacoes/respostas/${id}/like`, {
+      method: 'DELETE',
     });
   }
 }

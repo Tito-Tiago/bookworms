@@ -49,4 +49,9 @@ public class LivroController {
     public ResponseEntity<ApiResponse<LivroResponseDTO>> like(@PathVariable UUID id) {
         return ResponseFactory.success(service.like(id));
     }
+
+    @DeleteMapping("/{id}/like")
+    public ResponseEntity<ApiResponse<LivroResponseDTO>> unlike(@PathVariable UUID id) {
+        return ResponseFactory.success(service.unlike(id));
+    }
 }

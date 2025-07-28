@@ -63,6 +63,14 @@ public class LivroService {
         return new LivroResponseDTO(livro);
     }
 
+    public LivroResponseDTO unlike(UUID id) {
+        Livro livro = livroRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Livro não encontrado"));
+        livro.setLikes(Math.max(0, livro.getLikes() - 1));
+        livroRepository.save(livro);
+        return new LivroResponseDTO(livro);
+    }
+
     
 
 }

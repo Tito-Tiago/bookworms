@@ -157,8 +157,21 @@ export const LivroProvider: React.FC<{
   const alternarCurtida = async (livroId: string) => {
     if (!usuarioAtual) return;
     
+    // Verificar se o livro já foi curtido pelo usuário
+    const likedItems = localStorage.getItem('liked_livros');
+    const parsedLikes = likedItems ? JSON.parse(likedItems) : [];
+    const isLiked = parsedLikes.includes(livroId);
+    
     try {
-      const livroAtualizado = await apiService.likeLivro(livroId);
+      let livroAtualizado;
+      if (isLiked) {
+        // Remover like
+        livroAtualizado = await apiService.unlikeLivro(livroId);
+      } else {
+        // Adicionar like
+        livroAtualizado = await apiService.likeLivro(livroId);
+      }
+      
       setLivros(prev => prev.map(livro => 
         livro.id === livroId ? livroAtualizado : livro
       ));
@@ -209,8 +222,17 @@ export const LivroProvider: React.FC<{
   const alternarCurtidaAvaliacao = async (avaliacaoId: string) => {
     if (!usuarioAtual) return;
     
+    // Verificar se a avaliação já foi curtida pelo usuário
+    const likedItems = localStorage.getItem('liked_avaliacaos');
+    const parsedLikes = likedItems ? JSON.parse(likedItems) : [];
+    const isLiked = parsedLikes.includes(avaliacaoId);
+    
     try {
-      await apiService.likeAvaliacao(avaliacaoId);
+      if (isLiked) {
+        await apiService.unlikeAvaliacao(avaliacaoId);
+      } else {
+        await apiService.likeAvaliacao(avaliacaoId);
+      }
       // Recarregar todos os livros para atualizar as curtidas
       await carregarLivros();
     } catch (err) {
@@ -223,8 +245,17 @@ export const LivroProvider: React.FC<{
   const alternarCurtidaResposta = async (respostaId: string) => {
     if (!usuarioAtual) return;
     
+    // Verificar se a resposta já foi curtida pelo usuário
+    const likedItems = localStorage.getItem('liked_respostas');
+    const parsedLikes = likedItems ? JSON.parse(likedItems) : [];
+    const isLiked = parsedLikes.includes(respostaId);
+    
     try {
-      await apiService.likeResposta(respostaId);
+      if (isLiked) {
+        await apiService.unlikeResposta(respostaId);
+      } else {
+        await apiService.likeResposta(respostaId);
+      }
       // Recarregar todos os livros para atualizar as curtidas
       await carregarLivros();
     } catch (err) {
