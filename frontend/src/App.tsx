@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
 import AdminLogin from './pages/AdminLogin';
+import PainelAdministrativo from './pages/AdminPanel';
 import Inicio from './pages/Home';
 import DetalheLivro from './pages/LivroDetail';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -28,7 +29,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/home" element={<ProtectedRoute><Inicio /></ProtectedRoute>} />
       <Route path="/livro/:id" element={<ProtectedRoute><DetalheLivro /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-      <Route path="/admin" element={<AdminRoute><Inicio /></AdminRoute>} />
+      <Route path="/admin" element={<AdminRoute><PainelAdministrativo /></AdminRoute>} />
     </Routes>
   );
 };
