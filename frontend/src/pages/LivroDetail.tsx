@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLivros } from '../contexts/LivroContext';
 import { useAuth } from '../contexts/AuthContext';
-import { useLikes } from '../hooks/useLikes';
 import LikeButton from '../components/LikeButton';
 import { HeartIcon, StarIcon, TrashIcon, MessageSquareIcon, SendIcon } from 'lucide-react';
 
@@ -19,7 +18,9 @@ const DetalheLivro: React.FC = () => {
     excluirLivro,
     carregarLivro,
     loading,
-    error
+    error,
+    getLikeState,
+    toggleLikeLocal
   } = useLivros();
   const { usuarioAtual, ehAdmin } = useAuth();
 
@@ -29,7 +30,7 @@ const DetalheLivro: React.FC = () => {
   const [mostrarFormResposta, setMostrarFormResposta] = useState<{ [key: string]: boolean }>({});
 
   const livro = obterLivro(id || '');
-  const { isLiked: livroLiked, likesCount: livroLikes, toggleLike: toggleLivroLike } = useLikes(
+  const { isLiked: livroLiked, likesCount: livroLikes } = getLikeState(
     livro?.id || '', 
     livro?.likes || 0, 
     'livro'
@@ -73,13 +74,13 @@ const DetalheLivro: React.FC = () => {
     }
     
     // Atualizar UI imediatamente
-    toggleLivroLike();
+    toggleLikeLocal(livro.id, 'livro');
     
     try {
       await alternarCurtida(livro.id);
     } catch (error) {
       // Reverter mudança local em caso de erro
-      toggleLivroLike();
+      toggleLikeLocal(livro.id, 'livro');
       console.error('Erro ao curtir livro:', error);
     }
   };

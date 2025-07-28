@@ -38,6 +38,11 @@ interface Resposta {
   likes: number;
 }
 
+interface LikeState {
+  isLiked: boolean;
+  likesCount: number;
+}
+
 interface LivroContextType {
   livros: Livro[];
   loading: boolean;
@@ -53,6 +58,9 @@ interface LivroContextType {
   alternarCurtidaResposta: (respostaId: string) => Promise<void>;
   carregarLivros: () => Promise<void>;
   carregarLivro: (id: string) => Promise<void>;
+  // Funções para gerenciamento de likes
+  getLikeState: (itemId: string, initialLikes: number, type: 'livro' | 'avaliacao' | 'resposta') => LikeState;
+  toggleLikeLocal: (itemId: string, type: 'livro' | 'avaliacao' | 'resposta') => void;
 }
 
 const LivroContext = createContext<LivroContextType | undefined>(undefined);
@@ -71,6 +79,7 @@ export const LivroProvider: React.FC<{
   const [livros, setLivros] = useState<Livro[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [likeStates, setLikeStates] = useState<Map<string, LikeState>>(new Map());
   const { usuarioAtual } = useAuth();
 
   const carregarLivros = async () => {
@@ -265,6 +274,67 @@ export const LivroProvider: React.FC<{
     }
   };
 
+  // Funções para gerenciamento de likes
+  const getLikeState = (itemId: string, initialLikes: number, type: 'livro' | 'avaliacao' | 'resposta'): LikeState => {
+    const key = `${type}-${itemId}`;
+    
+    // Verificar se já temos o estado em cache
+    const cachedState = likeStates.get(key);
+    if (cachedState) {
+      return cachedState;
+    }
+    
+    // Verificar se o item foi curtido pelo usuário atual no localStorage
+    const likedItems = localStorage.getItem(`liked_${type}s`);
+    const parsedLikes = likedItems ? JSON.parse(likedItems) : [];
+    const isLiked = parsedLikes.includes(itemId);
+    
+    const newState: LikeState = {
+      isLiked,
+      likesCount: initialLikes
+    };
+    
+    // Armazenar no cache
+    setLikeStates(prev => new Map(prev).set(key, newState));
+    
+    return newState;
+  };
+
+  const toggleLikeLocal = (itemId: string, type: 'livro' | 'avaliacao' | 'resposta') => {
+    const key = `${type}-${itemId}`;
+    const currentState = likeStates.get(key);
+    
+    if (!currentState) return;
+    
+    const likedItems = localStorage.getItem(`liked_${type}s`);
+    const parsedLikes = likedItems ? JSON.parse(likedItems) : [];
+    
+    let newLikes: string[];
+    let newIsLiked: boolean;
+    let newCount: number;
+
+    if (parsedLikes.includes(itemId)) {
+      // Remove like
+      newLikes = parsedLikes.filter((id: string) => id !== itemId);
+      newIsLiked = false;
+      newCount = Math.max(0, currentState.likesCount - 1);
+    } else {
+      // Add like
+      newLikes = [...parsedLikes, itemId];
+      newIsLiked = true;
+      newCount = currentState.likesCount + 1;
+    }
+
+    localStorage.setItem(`liked_${type}s`, JSON.stringify(newLikes));
+    
+    const newState: LikeState = {
+      isLiked: newIsLiked,
+      likesCount: newCount
+    };
+    
+    setLikeStates(prev => new Map(prev).set(key, newState));
+  };
+
   const valor = {
     livros,
     loading,
@@ -279,7 +349,9 @@ export const LivroProvider: React.FC<{
     alternarCurtidaAvaliacao,
     alternarCurtidaResposta,
     carregarLivros,
-    carregarLivro
+    carregarLivro,
+    getLikeState,
+    toggleLikeLocal
   };
 
   return <LivroContext.Provider value={valor}>{children}</LivroContext.Provider>;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { HeartIcon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useLikes } from '../hooks/useLikes';
+import { useLivros } from '../contexts/LivroContext';
 
 interface LikeButtomProps {
   itemId: string;
@@ -12,19 +12,20 @@ interface LikeButtomProps {
 
 const LikeButton: React.FC<LikeButtomProps> = ({ itemId, initialLikes, type, onLike }) => {
   const { usuarioAtual } = useAuth();
-  const { isLiked, likesCount, toggleLike } = useLikes(itemId, initialLikes, type);
+  const { getLikeState, toggleLikeLocal } = useLivros();
+  const { isLiked, likesCount } = getLikeState(itemId, initialLikes, type);
 
   const handleLike = async () => {
     if (!usuarioAtual) return;
     
     // Atualizar UI imediatamente
-    toggleLike();
+    toggleLikeLocal(itemId, type);
     
     try {
       await onLike(itemId);
     } catch (error) {
       // Reverter mudança local em caso de erro
-      toggleLike();
+      toggleLikeLocal(itemId, type);
       console.error(`Erro ao curtir ${type}:`, error);
     }
   };

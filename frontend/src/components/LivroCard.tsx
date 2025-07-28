@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { HeartIcon, MessageSquareIcon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLivros } from '../contexts/LivroContext';
-import { useLikes } from '../hooks/useLikes';
 
 interface LivroCardProps {
   id: string;
@@ -23,22 +22,22 @@ const CartaoLivro: React.FC<LivroCardProps> = ({
   quantidadeAvaliacoes
 }) => {
   const { usuarioAtual } = useAuth();
-  const { alternarCurtida } = useLivros();
-  const { isLiked, likesCount, toggleLike } = useLikes(id, likes, 'livro');
+  const { alternarCurtida, getLikeState, toggleLikeLocal } = useLivros();
+  const { isLiked, likesCount } = getLikeState(id, likes, 'livro');
 
   const lidarCurtida = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (!usuarioAtual) return;
     
     // Atualizar UI imediatamente
-    toggleLike();
+    toggleLikeLocal(id, 'livro');
     
     try {
       // Sincronizar com backend
       await alternarCurtida(id);
     } catch (error) {
       // Reverter mudança local em caso de erro
-      toggleLike();
+      toggleLikeLocal(id, 'livro');
       console.error('Erro ao curtir livro:', error);
     }
   };
