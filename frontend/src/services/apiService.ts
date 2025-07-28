@@ -109,6 +109,65 @@ class ApiService {
       method: 'DELETE',
     });
   }
+
+  // Autenticação
+  async loginAluno(login: string, senha: string) {
+    const response = await fetch(`${this.baseURL}/auth/login/aluno`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ login, senha }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw errorData;
+    }
+    
+    return response.json();
+  }
+
+  async loginBibliotecario(username: string, password: string) {
+    const response = await fetch(`${this.baseURL}/auth/login/bibliotecario`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw errorData;
+    }
+    
+    return response.json();
+  }
+
+  async registerAluno(nomeCompleto: string, username: string, email: string, senha: string) {
+    const response = await fetch(`${this.baseURL}/alunos/cadastro`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nomeCompleto, email, username, senha }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw errorData;
+    }
+    
+    return response.json();
+  }
+
+  async updateAluno(id: string, data: any) {
+    return this.request<any>(`/alunos/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteAluno(id: string) {
+    return this.request<any>(`/alunos/${id}`, {
+      method: 'DELETE',
+    });
+  }
 }
 
 export const apiService = new ApiService();
