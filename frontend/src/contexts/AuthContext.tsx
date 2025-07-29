@@ -1,6 +1,5 @@
 import React, { useEffect, useState, createContext, useContext } from 'react';
-
-const API_URL = 'http://localhost:8080';
+import { apiService } from '../services/apiService';
 
 interface Usuario {
   id: string;
@@ -53,13 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (login: string, senha: string): Promise<void> => {
-    const response = await fetch(`${API_URL}/auth/login/aluno`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ login, senha }),
-    });
-    const responseData = await response.json();
-    if (!response.ok) throw responseData;
+    const responseData = await apiService.loginAluno(login, senha);
     const { token: novoToken, aluno } = responseData.data;
     setToken(novoToken);
     setUsuarioAtual(aluno);
@@ -69,13 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const adminLogin = async (username: string, password: string): Promise<void> => {
-     const response = await fetch(`${API_URL}/auth/login/bibliotecario`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
-    const responseData = await response.json();
-    if (!response.ok) throw responseData;
+    const responseData = await apiService.loginBibliotecario(username, password);
     const { token: novoToken } = responseData.data;
     const adminUser: Usuario = {
       id: 'admin', nomeCompleto: 'Bibliotecário', username: 'admin',
@@ -89,13 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   const register = async (nomeCompleto: string, username: string, email: string, senha: string): Promise<void> => {
-    const response = await fetch(`${API_URL}/alunos/cadastro`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nomeCompleto, email, username, senha }),
-    });
-    const responseData = await response.json();
-    if (!response.ok) throw responseData;
+    await apiService.registerAluno(nomeCompleto, username, email, senha);
   };
 
   const logout = () => {
@@ -109,19 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateProfile = async (data: Partial<Omit<Usuario, 'id' | 'fotoPerfilUrl'>>): Promise<void> => {
     if (!usuarioAtual || !token) throw new Error("Utilizador não autenticado.");
 
-    const response = await fetch(`${API_URL}/alunos/${usuarioAtual.id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(data),
-    });
-
-    const responseData = await response.json();
-    if (!response.ok) throw responseData;
-
-    const utilizadorAtualizado = responseData.data;
+    const utilizadorAtualizado = await apiService.updateAluno(usuarioAtual.id, data);
     setUsuarioAtual(utilizadorAtualizado);
     localStorage.setItem('usuario', JSON.stringify(utilizadorAtualizado));
   };
@@ -129,18 +98,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const deleteAccount = async (): Promise<void> => {
     if (!usuarioAtual || !token) throw new Error("Utilizador não autenticado.");
 
-    const response = await fetch(`${API_URL}/alunos/${usuarioAtual.id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw errorData;
-    }
-
+    await apiService.deleteAluno(usuarioAtual.id);
     logout();
   };
 

@@ -29,7 +29,7 @@ const Navbar: React.FC = () => {
     <nav className="bg-blue-600 text-white shadow-md">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-3">
-          <Link to={usuarioAtual ? "/profile" : "/login"} className="flex items-center space-x-2">
+          <Link to={ehAdmin ? "/admin-panel" : "/home"} className="flex items-center space-x-2">
             <BookOpenIcon className="h-6 w-6" />
             <span className="text-xl font-bold">Bookworms</span>
           </Link>

@@ -39,9 +39,21 @@ public class AvaliacaoController {
         return ResponseFactory.success(avaliacao);
     }
 
+    @DeleteMapping("/{id}/like")
+    public ResponseEntity<ApiResponse<AvaliacaoResponseDTO>> unlikeAvaliacao(@PathVariable UUID id) {
+        AvaliacaoResponseDTO avaliacao = avaliacaoService.unlikeAvaliacao(id);
+        return ResponseFactory.success(avaliacao);
+    }
+
     @PostMapping("/respostas/{id}/like")
     public ResponseEntity<ApiResponse<RespostaResponseDTO>> likeReply(@PathVariable UUID id) {
         RespostaResponseDTO reply = avaliacaoService.likeResposta(id);
+        return ResponseFactory.success(reply);
+    }
+
+    @DeleteMapping("/respostas/{id}/like")
+    public ResponseEntity<ApiResponse<RespostaResponseDTO>> unlikeReply(@PathVariable UUID id) {
+        RespostaResponseDTO reply = avaliacaoService.unlikeResposta(id);
         return ResponseFactory.success(reply);
     }
 }

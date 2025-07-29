@@ -64,10 +64,26 @@ public class AvaliacaoService {
         return new AvaliacaoResponseDTO(avaliacao);
     }
 
+    public AvaliacaoResponseDTO unlikeAvaliacao(UUID id) {
+        Avaliacao avaliacao = avaliacaoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Avaliação não encontrada"));
+        avaliacao.setLikes(Math.max(0, avaliacao.getLikes() - 1));
+        avaliacaoRepository.save(avaliacao);
+        return new AvaliacaoResponseDTO(avaliacao);
+    }
+
     public RespostaResponseDTO likeResposta(UUID id) {
         Resposta resposta = respostaRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Resposta não encontrada"));
         resposta.setLikes(resposta.getLikes() + 1);
+        respostaRepository.save(resposta);
+        return new RespostaResponseDTO(resposta);
+    }
+
+    public RespostaResponseDTO unlikeResposta(UUID id) {
+        Resposta resposta = respostaRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Resposta não encontrada"));
+        resposta.setLikes(Math.max(0, resposta.getLikes() - 1));
         respostaRepository.save(resposta);
         return new RespostaResponseDTO(resposta);
     }
