@@ -32,3 +32,10 @@ link para o documento de requisitos : https://docs.google.com/document/d/19x8fVq
 - [ ] Avaliações e Resenhas: Possibilitar a avaliação de livros com notas de 1 a 5 estrelas e a escrita de resenhas (com opção de marcação de spoiler) que contribuem para a nota da comunidade.
 - [ ] Estante virtual: É possível registrar livros nas categorias “quero ler”, “lendo”, “lido” e "abandonado", para organizar e compartilhar minhas leituras.
 - [ ] Interação Social (Seguir Usuários): Implementar a função de seguir/deixar de seguir outros estudantes e visualizar um Feed de Atividades cronológico com as novas avaliações e adições de livros dos usuários seguidos.
+
+## Links
+
+- ![Github projects](https://github.com/users/Tito-Tiago/projects/3)
+- ![figma](https://www.figma.com/design/I8Inl5r5F7t2S7WZGvB6pb/BOOKWORMS?node-id=0-1&p=f)
+- ![drive](https://drive.google.com/drive/folders/1mIZHFhDf3y160ceH3OSbGXPwrhUBFgXv)
+
