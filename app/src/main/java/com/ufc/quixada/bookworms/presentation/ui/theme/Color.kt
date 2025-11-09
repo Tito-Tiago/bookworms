@@ -1,4 +1,4 @@
-package com.ufc.quixada.bookworms.ui.theme
+package com.ufc.quixada.bookworms.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

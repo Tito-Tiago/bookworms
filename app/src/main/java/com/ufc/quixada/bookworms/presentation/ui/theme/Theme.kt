@@ -1,4 +1,4 @@
-package com.ufc.quixada.bookworms.ui.theme
+package com.ufc.quixada.bookworms.presentation.ui.theme
 
 import android.app.Activity
 import android.os.Build
