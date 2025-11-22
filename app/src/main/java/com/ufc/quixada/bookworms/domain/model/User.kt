@@ -1,4 +1,4 @@
-package com.ufc.quixada.bookworms.domain.model
+import java.util.Date
 
 data class User(
     val uid: String = "",
@@ -6,5 +6,11 @@ data class User(
     val email: String = "",
     val fotoUrl: String? = null,
     val turma: String? = null,
-    val role: String = "aluno" // aluno ou docente
+    val role: UserRole = UserRole.ALUNO,
+    val dataCadastro: Date = Date()
 )
+
+enum class UserRole {
+    ALUNO,
+    DOCENTE
+}
