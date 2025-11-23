@@ -36,9 +36,16 @@ class RegisterViewModel @Inject constructor(
         _uiState.update { it.copy(confirmPassword = confirmPassword, errorMessage = null) }
     }
 
+    fun onTogglePasswordVisibility() {
+        _uiState.update { it.copy(isPasswordVisible = !it.isPasswordVisible) }
+    }
+
+    fun onToggleConfirmPasswordVisibility() {
+        _uiState.update { it.copy(isConfirmPasswordVisible = !it.isConfirmPasswordVisible) }
+    }
+
     fun onRegisterClick() {
         viewModelScope.launch {
-            // Validar se as senhas coincidem
             if (_uiState.value.password != _uiState.value.confirmPassword) {
                 _uiState.update { it.copy(errorMessage = "As senhas não coincidem") }
                 return@launch
