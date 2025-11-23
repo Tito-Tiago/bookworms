@@ -3,6 +3,7 @@ package com.ufc.quixada.bookworms.data.repository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.ufc.quixada.bookworms.domain.model.User
+import com.ufc.quixada.bookworms.domain.model.UserRole
 import com.ufc.quixada.bookworms.domain.repository.AuthRepository
 import com.ufc.quixada.bookworms.domain.repository.AuthResult
 import kotlinx.coroutines.tasks.await
@@ -24,7 +25,7 @@ class AuthRepositoryImpl @Inject constructor(
                 uid = firebaseUser.uid,
                 nome = nome,
                 email = email,
-                role = "aluno"
+                role = UserRole.ALUNO
             )
 
             firestore.collection("users")

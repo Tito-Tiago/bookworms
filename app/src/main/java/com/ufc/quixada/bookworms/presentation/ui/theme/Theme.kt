@@ -1,6 +1,5 @@
 package com.ufc.quixada.bookworms.presentation.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -12,25 +11,31 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = BW_Primary_Green,
+    secondary = BW_Secondary_Purple,
+    tertiary = BW_Primary_Green,
+    background = BW_Black,
+    surface = BW_Black,
+
+    onPrimary = BW_Black,
+    onSecondary = BW_White,
+    onBackground = BW_White,
+    onSurface = BW_White,
+    onSurfaceVariant = BW_Primary_Green
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = BW_Primary_Green,
+    secondary = BW_Secondary_Purple,
+    tertiary = BW_Primary_Green,
+    background = BW_White,
+    surface = BW_White,
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    onPrimary = BW_Black,
+    onSecondary = BW_White,
+    onBackground = BW_Black,
+    onSurface = BW_Black,
+    onSurfaceVariant = BW_Secondary_Purple
 )
 
 @Composable
