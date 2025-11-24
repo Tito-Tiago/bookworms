@@ -10,6 +10,7 @@ import com.ufc.quixada.bookworms.presentation.auth.login.LoginScreen
 import com.ufc.quixada.bookworms.presentation.auth.register.RegisterScreen
 import com.ufc.quixada.bookworms.presentation.book_details.BookDetailsScreen
 import com.ufc.quixada.bookworms.presentation.home.HomeScreen
+import com.ufc.quixada.bookworms.presentation.profile.ProfileScreen
 import com.ufc.quixada.bookworms.presentation.splash.SplashScreen
 
 sealed class Screen(val route: String) {
@@ -17,6 +18,7 @@ sealed class Screen(val route: String) {
     data object Login : Screen("login")
     data object Register : Screen("register")
     data object Home : Screen("home")
+    data object Profile : Screen("profile")
 
     data object BookDetails : Screen("book_details/{bookId}") {
         fun createRoute(bookId: String) = "book_details/$bookId"
@@ -69,10 +71,26 @@ fun NavigationGraph() {
             )
         }
 
+        composable(Screen.Profile.route) {
+            ProfileScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable(Screen.Home.route) {
             HomeScreen(
                 onBookClick = { bookId ->
                     navController.navigate(Screen.BookDetails.createRoute(bookId))
+                },
+                onProfileClick = {
+                    navController.navigate(Screen.Profile.route)
                 }
             )
         }
