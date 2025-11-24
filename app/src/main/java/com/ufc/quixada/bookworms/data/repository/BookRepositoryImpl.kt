@@ -48,4 +48,22 @@ class BookRepositoryImpl @Inject constructor(
             SingleBookResult.Error(e.message ?: "Erro ao buscar detalhes do livro")
         }
     }
+
+    override suspend fun searchBooks(query: String): BookResult {
+        return try {
+            val snapshot = firestore.collection("books")
+                .whereGreaterThanOrEqualTo("titulo", query)
+                .whereLessThanOrEqualTo("titulo", query + "\uf8ff")
+                .get()
+                .await()
+
+            val books = snapshot.documents.mapNotNull { doc ->
+                doc.toObject(Book::class.java)?.copy(bookId = doc.id)
+            }
+
+            BookResult.Success(books)
+        } catch (e: Exception) {
+            BookResult.Error(e.message ?: "Erro ao buscar livros")
+        }
+    }
 }
