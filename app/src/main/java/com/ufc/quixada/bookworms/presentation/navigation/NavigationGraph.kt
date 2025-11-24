@@ -1,18 +1,14 @@
 package com.ufc.quixada.bookworms.presentation.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.ufc.quixada.bookworms.presentation.auth.login.LoginScreen
 import com.ufc.quixada.bookworms.presentation.auth.register.RegisterScreen
+import com.ufc.quixada.bookworms.presentation.book_details.BookDetailsScreen
 import com.ufc.quixada.bookworms.presentation.home.HomeScreen
 import com.ufc.quixada.bookworms.presentation.splash.SplashScreen
 
@@ -21,6 +17,10 @@ sealed class Screen(val route: String) {
     data object Login : Screen("login")
     data object Register : Screen("register")
     data object Home : Screen("home")
+
+    data object BookDetails : Screen("book_details/{bookId}") {
+        fun createRoute(bookId: String) = "book_details/$bookId"
+    }
 }
 
 @Composable
@@ -32,6 +32,7 @@ fun NavigationGraph() {
         startDestination = Screen.Splash.route
     ) {
 
+        // Tela de Splash
         composable(Screen.Splash.route) {
             SplashScreen(
                 onTimeout = {
@@ -71,10 +72,18 @@ fun NavigationGraph() {
         composable(Screen.Home.route) {
             HomeScreen(
                 onBookClick = { bookId ->
-                    // Por enquanto apenas logamos ou deixamos vazio.
-                    // No próximo passo (HU-05) faremos a navegação:
-                    // navController.navigate("book_details/$bookId")
-                    println("Livro clicado: $bookId")
+                    navController.navigate(Screen.BookDetails.createRoute(bookId))
+                }
+            )
+        }
+
+        composable(
+            route = Screen.BookDetails.route,
+            arguments = listOf(navArgument("bookId") { type = NavType.StringType })
+        ) {
+            BookDetailsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }
