@@ -13,6 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.ufc.quixada.bookworms.presentation.auth.login.LoginScreen
 import com.ufc.quixada.bookworms.presentation.auth.register.RegisterScreen
+import com.ufc.quixada.bookworms.presentation.home.HomeScreen
 import com.ufc.quixada.bookworms.presentation.splash.SplashScreen
 
 sealed class Screen(val route: String) {
@@ -68,24 +69,13 @@ fun NavigationGraph() {
         }
 
         composable(Screen.Home.route) {
-            HomeScreenPlaceholder()
-        }
-    }
-}
-
-@Composable
-fun HomeScreenPlaceholder() {
-    Surface(
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Home Screen - Em Desenvolvimento",
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.headlineMedium
+            HomeScreen(
+                onBookClick = { bookId ->
+                    // Por enquanto apenas logamos ou deixamos vazio.
+                    // No próximo passo (HU-05) faremos a navegação:
+                    // navController.navigate("book_details/$bookId")
+                    println("Livro clicado: $bookId")
+                }
             )
         }
     }

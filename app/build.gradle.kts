@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation("androidx.compose.material:material-icons-extended:1.7.6")
+    implementation("io.coil-kt:coil-compose:2.7.0")
 
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.5.1"))

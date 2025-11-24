@@ -3,7 +3,9 @@ package com.ufc.quixada.bookworms.di
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.ufc.quixada.bookworms.data.repository.AuthRepositoryImpl
+import com.ufc.quixada.bookworms.data.repository.BookRepositoryImpl
 import com.ufc.quixada.bookworms.domain.repository.AuthRepository
+import com.ufc.quixada.bookworms.domain.repository.BookRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -33,5 +35,13 @@ object AppModule {
         firestore: FirebaseFirestore
     ): AuthRepository {
         return AuthRepositoryImpl(auth, firestore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideBookRepository(
+        firestore: FirebaseFirestore
+    ): BookRepository {
+        return BookRepositoryImpl(firestore)
     }
 }
