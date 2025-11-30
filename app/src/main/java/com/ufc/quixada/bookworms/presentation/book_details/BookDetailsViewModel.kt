@@ -3,8 +3,10 @@ package com.ufc.quixada.bookworms.presentation.book_details
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ufc.quixada.bookworms.domain.repository.FavoriteResult
 import com.ufc.quixada.bookworms.domain.repository.SingleBookResult
 import com.ufc.quixada.bookworms.domain.usecase.GetBookDetailsUseCase
+import com.ufc.quixada.bookworms.domain.usecase.ManageFavoriteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +18,7 @@ import javax.inject.Inject
 @HiltViewModel
 class BookDetailsViewModel @Inject constructor(
     private val getBookDetailsUseCase: GetBookDetailsUseCase,
+    private val manageFavoriteUseCase: ManageFavoriteUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -32,16 +35,43 @@ class BookDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            when (val result = getBookDetailsUseCase(id)) {
-                is SingleBookResult.Success -> {
-                    _uiState.update {
-                        it.copy(isLoading = false, book = result.data)
-                    }
+            val bookResult = getBookDetailsUseCase(id)
+
+            val favResult = manageFavoriteUseCase.checkFavoriteStatus(id)
+
+            if (bookResult is SingleBookResult.Success) {
+                val isFav = if (favResult is FavoriteResult.Success) favResult.isFavorite else false
+
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        book = bookResult.data,
+                        isFavorite = isFav
+                    )
                 }
-                is SingleBookResult.Error -> {
-                    _uiState.update {
-                        it.copy(isLoading = false, errorMessage = result.message)
-                    }
+            } else if (bookResult is SingleBookResult.Error) {
+                _uiState.update {
+                    it.copy(isLoading = false, errorMessage = bookResult.message)
+                }
+            }
+        }
+    }
+
+    fun onFavoriteClick() {
+        val currentId = bookId ?: return
+        val currentStatus = _uiState.value.isFavorite
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isFavorite = !currentStatus) }
+
+            val result = manageFavoriteUseCase.toggleFavorite(currentId, currentStatus)
+
+            if (result is FavoriteResult.Error) {
+                _uiState.update {
+                    it.copy(
+                        isFavorite = currentStatus,
+                        errorMessage = result.message
+                    )
                 }
             }
         }

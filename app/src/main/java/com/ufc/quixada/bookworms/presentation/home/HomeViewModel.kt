@@ -3,7 +3,9 @@ package com.ufc.quixada.bookworms.presentation.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ufc.quixada.bookworms.domain.repository.BookResult
+import com.ufc.quixada.bookworms.domain.repository.FavoriteListResult
 import com.ufc.quixada.bookworms.domain.usecase.GetBooksUseCase
+import com.ufc.quixada.bookworms.domain.usecase.ManageFavoriteUseCase
 import com.ufc.quixada.bookworms.domain.usecase.SearchBooksUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -18,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getBooksUseCase: GetBooksUseCase,
-    private val searchBooksUseCase: SearchBooksUseCase
+    private val searchBooksUseCase: SearchBooksUseCase,
+    private val manageFavoriteUseCase: ManageFavoriteUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -33,19 +36,33 @@ class HomeViewModel @Inject constructor(
         loadBooks()
     }
 
+    private suspend fun loadFavorites() {
+        when (val result = manageFavoriteUseCase.getAllFavoriteBookIds()) {
+            is FavoriteListResult.Success -> {
+                _uiState.update { it.copy(favoriteBookIds = result.bookIds.toSet()) }
+            }
+            is FavoriteListResult.Error -> {
+            }
+        }
+    }
+
     fun loadBooks() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            when (val result = getBooksUseCase()) {
+            val bookResult = getBooksUseCase()
+
+            loadFavorites()
+
+            when (bookResult) {
                 is BookResult.Success -> {
                     _uiState.update {
-                        it.copy(isLoading = false, books = result.data)
+                        it.copy(isLoading = false, books = bookResult.data)
                     }
                 }
                 is BookResult.Error -> {
                     _uiState.update {
-                        it.copy(isLoading = false, errorMessage = result.message)
+                        it.copy(isLoading = false, errorMessage = bookResult.message)
                     }
                 }
             }
@@ -57,7 +74,7 @@ class HomeViewModel @Inject constructor(
 
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
-            delay(500) // Debounce de 500ms
+            delay(500)
             performSearch(newQuery)
         }
     }
@@ -66,6 +83,8 @@ class HomeViewModel @Inject constructor(
         _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
         val result = searchBooksUseCase(query)
+
+        loadFavorites()
 
         when (result) {
             is BookResult.Success -> {
