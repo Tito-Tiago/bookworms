@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Favorite // Import novo
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
@@ -150,7 +151,11 @@ fun HomeScreen(
                             modifier = Modifier.fillMaxSize()
                         ) {
                             items(uiState.books) { book ->
-                                BookItem(book = book, onClick = { onBookClick(book.bookId) })
+                                BookItem(
+                                    book = book,
+                                    isFavorite = uiState.favoriteBookIds.contains(book.bookId), // Verifica favorito
+                                    onClick = { onBookClick(book.bookId) }
+                                )
                             }
                         }
                     }
@@ -161,7 +166,11 @@ fun HomeScreen(
 }
 
 @Composable
-fun BookItem(book: Book, onClick: () -> Unit) {
+fun BookItem(
+    book: Book,
+    isFavorite: Boolean,
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -192,6 +201,19 @@ fun BookItem(book: Book, onClick: () -> Unit) {
                             .size(64.dp)
                             .align(Alignment.Center),
                         tint = Color.Gray
+                    )
+                }
+
+                // Ícone de favorito
+                if (isFavorite) {
+                    Icon(
+                        imageVector = Icons.Default.Favorite,
+                        contentDescription = "Favorito",
+                        tint = Color.Red,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp)
+                            .size(24.dp)
                     )
                 }
             }

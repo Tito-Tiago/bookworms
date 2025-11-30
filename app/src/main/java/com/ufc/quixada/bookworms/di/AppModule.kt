@@ -4,9 +4,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.ufc.quixada.bookworms.data.repository.AuthRepositoryImpl
 import com.ufc.quixada.bookworms.data.repository.BookRepositoryImpl
+import com.ufc.quixada.bookworms.data.repository.FavoriteRepositoryImpl
 import com.ufc.quixada.bookworms.data.repository.UserRepositoryImpl
 import com.ufc.quixada.bookworms.domain.repository.AuthRepository
 import com.ufc.quixada.bookworms.domain.repository.BookRepository
+import com.ufc.quixada.bookworms.domain.repository.FavoriteRepository
 import com.ufc.quixada.bookworms.domain.repository.UserRepository
 import dagger.Module
 import dagger.Provides
@@ -53,5 +55,13 @@ object AppModule {
         firestore: FirebaseFirestore
     ): UserRepository {
         return UserRepositoryImpl(firestore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFavoriteRepository(
+        firestore: FirebaseFirestore
+    ): FavoriteRepository {
+        return FavoriteRepositoryImpl(firestore)
     }
 }
