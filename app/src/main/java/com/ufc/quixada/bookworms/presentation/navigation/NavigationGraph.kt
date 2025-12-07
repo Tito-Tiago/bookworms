@@ -1,6 +1,7 @@
 package com.ufc.quixada.bookworms.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -34,7 +35,6 @@ fun NavigationGraph() {
         startDestination = Screen.Splash.route
     ) {
 
-        // Tela de Splash
         composable(Screen.Splash.route) {
             SplashScreen(
                 onTimeout = {
@@ -87,10 +87,14 @@ fun NavigationGraph() {
         composable(Screen.Home.route) {
             HomeScreen(
                 onBookClick = { bookId ->
-                    navController.navigate(Screen.BookDetails.createRoute(bookId))
+                    if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.navigate(Screen.BookDetails.createRoute(bookId))
+                    }
                 },
                 onProfileClick = {
-                    navController.navigate(Screen.Profile.route)
+                    if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.navigate(Screen.Profile.route)
+                    }
                 }
             )
         }
@@ -101,7 +105,9 @@ fun NavigationGraph() {
         ) {
             BookDetailsScreen(
                 onNavigateBack = {
-                    navController.popBackStack()
+                    if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                        navController.popBackStack()
+                    }
                 }
             )
         }
