@@ -3,7 +3,6 @@ package com.ufc.quixada.bookworms.presentation.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ufc.quixada.bookworms.domain.repository.BookResult
-import com.ufc.quixada.bookworms.domain.repository.FavoriteListResult
 import com.ufc.quixada.bookworms.domain.usecase.GetBooksUseCase
 import com.ufc.quixada.bookworms.domain.usecase.ManageFavoriteUseCase
 import com.ufc.quixada.bookworms.domain.usecase.SearchBooksUseCase
@@ -34,15 +33,16 @@ class HomeViewModel @Inject constructor(
 
     init {
         loadBooks()
+        observeFavorites()
     }
 
-    private suspend fun loadFavorites() {
-        when (val result = manageFavoriteUseCase.getAllFavoriteBookIds()) {
-            is FavoriteListResult.Success -> {
-                _uiState.update { it.copy(favoriteBookIds = result.bookIds.toSet()) }
-            }
-            is FavoriteListResult.Error -> {
-            }
+    // Método para observar o fluxo em tempo real
+    private fun observeFavorites() {
+        viewModelScope.launch {
+            manageFavoriteUseCase.observeFavorites()
+                .collect { favoriteIds ->
+                    _uiState.update { it.copy(favoriteBookIds = favoriteIds.toSet()) }
+                }
         }
     }
 
@@ -51,8 +51,6 @@ class HomeViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
             val bookResult = getBooksUseCase()
-
-            loadFavorites()
 
             when (bookResult) {
                 is BookResult.Success -> {
@@ -84,7 +82,6 @@ class HomeViewModel @Inject constructor(
 
         val result = searchBooksUseCase(query)
 
-        loadFavorites()
 
         when (result) {
             is BookResult.Success -> {
