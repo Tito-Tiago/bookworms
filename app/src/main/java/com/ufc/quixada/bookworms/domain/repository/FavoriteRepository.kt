@@ -1,5 +1,7 @@
 package com.ufc.quixada.bookworms.domain.repository
 
+import kotlinx.coroutines.flow.Flow
+
 sealed class FavoriteResult {
     data class Success(val isFavorite: Boolean) : FavoriteResult()
     data class Error(val message: String) : FavoriteResult()
@@ -15,4 +17,7 @@ interface FavoriteRepository {
     suspend fun addFavorite(userId: String, bookId: String): FavoriteResult
     suspend fun removeFavorite(userId: String, bookId: String): FavoriteResult
     suspend fun getUserFavorites(userId: String): FavoriteListResult
+
+    // Novo método para fluxo em tempo real
+    fun getFavoritesFlow(userId: String): Flow<List<String>>
 }

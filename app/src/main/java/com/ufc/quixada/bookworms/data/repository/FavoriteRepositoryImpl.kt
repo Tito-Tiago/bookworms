@@ -5,6 +5,9 @@ import com.ufc.quixada.bookworms.domain.model.Favorite
 import com.ufc.quixada.bookworms.domain.repository.FavoriteListResult
 import com.ufc.quixada.bookworms.domain.repository.FavoriteRepository
 import com.ufc.quixada.bookworms.domain.repository.FavoriteResult
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import java.util.Date
 import java.util.UUID
@@ -79,5 +82,25 @@ class FavoriteRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             FavoriteListResult.Error(e.message ?: "Erro ao buscar favoritos")
         }
+    }
+
+    // Implementação do fluxo em tempo real
+    override fun getFavoritesFlow(userId: String): Flow<List<String>> = callbackFlow {
+        val listener = firestore.collection("favorites")
+            .whereEqualTo("userId", userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                val bookIds = snapshot?.documents?.mapNotNull { doc ->
+                    doc.getString("bookId")
+                } ?: emptyList()
+
+                trySend(bookIds)
+            }
+
+        awaitClose { listener.remove() }
     }
 }

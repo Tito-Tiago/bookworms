@@ -4,6 +4,9 @@ import com.ufc.quixada.bookworms.domain.repository.AuthRepository
 import com.ufc.quixada.bookworms.domain.repository.FavoriteListResult
 import com.ufc.quixada.bookworms.domain.repository.FavoriteRepository
 import com.ufc.quixada.bookworms.domain.repository.FavoriteResult
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class ManageFavoriteUseCase @Inject constructor(
@@ -33,5 +36,14 @@ class ManageFavoriteUseCase @Inject constructor(
             ?: return FavoriteListResult.Error("Usuário não logado")
 
         return favoriteRepository.getUserFavorites(currentUser.uid)
+    }
+
+    fun observeFavorites(): Flow<List<String>> = flow {
+        val currentUser = authRepository.getCurrentUser()
+        if (currentUser != null) {
+            emitAll(favoriteRepository.getFavoritesFlow(currentUser.uid))
+        } else {
+            emit(emptyList())
+        }
     }
 }
