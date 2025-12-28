@@ -54,6 +54,18 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.7.6")
     implementation("io.coil-kt:coil-compose:2.7.0")
 
+    // Ktor Client
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.client.logging)
+
+    // Dependências do Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
     implementation("com.google.firebase:firebase-auth")
