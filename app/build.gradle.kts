@@ -54,6 +54,9 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.7.6")
     implementation("io.coil-kt:coil-compose:2.7.0")
 
+    // --- Google Sign-In (Adicionado) ---
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
     implementation("com.google.firebase:firebase-auth")
