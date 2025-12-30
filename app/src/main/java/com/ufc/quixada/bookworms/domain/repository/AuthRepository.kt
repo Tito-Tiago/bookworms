@@ -10,6 +10,7 @@ sealed class AuthResult {
 interface AuthRepository {
     suspend fun register(nome: String, email: String, password: String): AuthResult
     suspend fun login(email: String, password: String): AuthResult
+    suspend fun loginWithGoogle(idToken: String): AuthResult
     suspend fun logout()
     suspend fun getCurrentUser(): User?
     fun isUserLoggedIn(): Boolean

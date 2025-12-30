@@ -1,6 +1,7 @@
 package com.ufc.quixada.bookworms.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.ufc.quixada.bookworms.domain.model.User
 import com.ufc.quixada.bookworms.domain.model.UserRole
@@ -16,11 +17,9 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun register(nome: String, email: String, password: String): AuthResult {
         return try {
-            // Criar usuário no Firebase Auth
             val result = auth.createUserWithEmailAndPassword(email, password).await()
             val firebaseUser = result.user ?: return AuthResult.Error("Erro ao criar usuário")
 
-            // Criar documento do usuário no Firestore
             val user = User(
                 uid = firebaseUser.uid,
                 nome = nome,
@@ -41,11 +40,9 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun login(email: String, password: String): AuthResult {
         return try {
-            // Fazer login no Firebase Auth
             val result = auth.signInWithEmailAndPassword(email, password).await()
             val firebaseUser = result.user ?: return AuthResult.Error("Erro ao fazer login")
 
-            // Buscar dados do usuário no Firestore
             val userDoc = firestore.collection("users")
                 .document(firebaseUser.uid)
                 .get()
@@ -57,6 +54,41 @@ class AuthRepositoryImpl @Inject constructor(
             AuthResult.Success(user)
         } catch (e: Exception) {
             AuthResult.Error(e.message ?: "Erro desconhecido ao fazer login")
+        }
+    }
+
+    override suspend fun loginWithGoogle(idToken: String): AuthResult {
+        return try {
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            val result = auth.signInWithCredential(credential).await()
+            val firebaseUser = result.user ?: return AuthResult.Error("Erro ao autenticar com Google")
+
+            // Verifica se o usuário já existe no Firestore
+            val userDoc = firestore.collection("users")
+                .document(firebaseUser.uid)
+                .get()
+                .await()
+
+            if (userDoc.exists()) {
+                val user = userDoc.toObject(User::class.java)
+                    ?: return AuthResult.Error("Erro ao recuperar dados do usuário")
+                AuthResult.Success(user)
+            } else {
+                // Se não existe, cria um novo registro
+                val newUser = User(
+                    uid = firebaseUser.uid,
+                    nome = firebaseUser.displayName ?: "Usuário Google",
+                    email = firebaseUser.email ?: "",
+                    role = UserRole.ALUNO
+                )
+                firestore.collection("users")
+                    .document(firebaseUser.uid)
+                    .set(newUser)
+                    .await()
+                AuthResult.Success(newUser)
+            }
+        } catch (e: Exception) {
+            AuthResult.Error(e.message ?: "Erro no Login Google")
         }
     }
 

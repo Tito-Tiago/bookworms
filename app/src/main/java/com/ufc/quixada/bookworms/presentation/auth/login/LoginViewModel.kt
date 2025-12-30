@@ -2,6 +2,10 @@ package com.ufc.quixada.bookworms.presentation.auth.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
+import com.ufc.quixada.bookworms.domain.repository.AuthRepository
 import com.ufc.quixada.bookworms.domain.repository.AuthResult
 import com.ufc.quixada.bookworms.domain.usecase.LoginUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +18,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val loginUseCase: LoginUseCase
+    private val loginUseCase: LoginUseCase,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -53,6 +58,30 @@ class LoginViewModel @Inject constructor(
                         )
                     }
                 }
+            }
+        }
+    }
+
+    fun onGoogleSignInResult(task: Task<GoogleSignInAccount>) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            try {
+                val account = task.getResult(ApiException::class.java)
+                val idToken = account.idToken
+                if (idToken != null) {
+                    when (val result = authRepository.loginWithGoogle(idToken)) {
+                        is AuthResult.Success -> {
+                            _uiState.update { it.copy(isLoading = false, isLoginSuccessful = true) }
+                        }
+                        is AuthResult.Error -> {
+                            _uiState.update { it.copy(isLoading = false, errorMessage = result.message) }
+                        }
+                    }
+                } else {
+                    _uiState.update { it.copy(isLoading = false, errorMessage = "Token do Google inválido") }
+                }
+            } catch (e: ApiException) {
+                _uiState.update { it.copy(isLoading = false, errorMessage = "Erro Google: ${e.statusCode}") }
             }
         }
     }
