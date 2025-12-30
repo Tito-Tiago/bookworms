@@ -1,5 +1,7 @@
 package com.ufc.quixada.bookworms.data.repository
 
+import com.ufc.quixada.bookworms.data.remote.OpenLibraryBookDetailsDto
+import com.ufc.quixada.bookworms.data.remote.OpenLibraryRatingResponse
 import com.ufc.quixada.bookworms.data.remote.OpenLibrarySearchResponse
 import com.ufc.quixada.bookworms.domain.model.Book
 import com.ufc.quixada.bookworms.domain.repository.OpenLibraryRepository
@@ -7,13 +9,15 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 
 class OpenLibraryRepositoryImpl @Inject constructor(
     private val client: HttpClient
 ): OpenLibraryRepository {
     private val apiBase = "https://openlibrary.org/search.json"
-    private val detailsBase = "https://openlibrary.org" // /books/ or /works/
+    private val detailsBase = "https://openlibrary.org" // /books/ ou /works/
 
     override suspend fun searchBooks(query: String): Result<List<Book>> {
         return try {
@@ -50,8 +54,38 @@ class OpenLibraryRepositoryImpl @Inject constructor(
     override suspend fun getBookDetails(
         workKey: String,
         editionKey: String?
-    ): Result<Book> {
-        TODO("Not yet implemented")
+    ): Result<Book> = coroutineScope {
+        try {
+            val rattingsDeferred = async {
+                try {
+                    // /works/OL123W -> OL123W
+                    val workId = workKey.substringAfterLast("/")
+                    client.get("$detailsBase/works/$workId/ratings.json").body<OpenLibraryRatingResponse>()
+                } catch (e: Exception) { null }
+            }
+
+            val detailsDeferred = async {
+                if (editionKey != null) {
+                    try {
+                        val editionId = editionKey.substringAfterLast("/")
+                        client.get("$detailsBase/books/$editionId.json").body<OpenLibraryBookDetailsDto>()
+                    } catch (e: Exception) { null }
+                } else null
+            }
+
+            val ratings = rattingsDeferred.await()
+            val details = detailsDeferred.await()
+
+            val book = Book(
+                bookId = editionKey ?: workKey,
+                sinopse = details?.description?.value ?: "Sinopse indisponível.",
+                notaApiExterna = ratings?.sumary?.average ?: 0f,
+                isbn = details?.isbn13?.joinToString(", ") ?: details?.isbn10?.joinToString(", ")
+            )
+            Result.success(book)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     private fun getCoverUrl(coverId: Int?): String? {

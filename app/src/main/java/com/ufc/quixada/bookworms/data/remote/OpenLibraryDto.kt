@@ -35,7 +35,7 @@ data class OpenLibraryEditionDocDto(
 )
 
 @Serializable
-data class OpenLibraryRatingResponseO(
+data class OpenLibraryRatingResponse(
     val sumary: RatingSumary? = null
 )
 
