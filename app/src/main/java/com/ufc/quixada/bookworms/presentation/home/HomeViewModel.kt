@@ -50,9 +50,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            val bookResult = getBooksUseCase()
-
-            when (bookResult) {
+            when (val bookResult = getBooksUseCase()) {
                 is BookResult.Success -> {
                     _uiState.update {
                         it.copy(isLoading = false, books = bookResult.data)
@@ -80,10 +78,7 @@ class HomeViewModel @Inject constructor(
     private suspend fun performSearch(query: String) {
         _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-        val result = searchBooksUseCase(query)
-
-
-        when (result) {
+        when (val result = searchBooksUseCase(query)) {
             is BookResult.Success -> {
                 _uiState.update { it.copy(isLoading = false, books = result.data) }
             }

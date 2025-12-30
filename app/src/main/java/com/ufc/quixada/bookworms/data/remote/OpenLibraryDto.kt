@@ -2,6 +2,7 @@ package com.ufc.quixada.bookworms.data.remote
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 @Serializable
 data class OpenLibrarySearchResponse(
@@ -36,24 +37,25 @@ data class OpenLibraryEditionDocDto(
 
 @Serializable
 data class OpenLibraryRatingResponse(
-    val sumary: RatingSumary? = null
+    @SerialName("summary")
+    val summary: RatingSummary? = null
 )
 
 @Serializable
-data class RatingSumary(
+data class RatingSummary(
     val average: Float? = null
 )
 
 @Serializable
 data class OpenLibraryBookDetailsDto(
-    val description: DescriptionDto? = null, //pode ser um objeto ou string
+    val description: JsonElement? = null, // Pode ser String ou Objeto
     @SerialName("isbn_13")
     val isbn13: List<String>? = null,
     @SerialName("isbn_10")
     val isbn10: List<String>? = null
-
 )
 
+@Serializable
 data class DescriptionDto(
     val value: String? = null
 )

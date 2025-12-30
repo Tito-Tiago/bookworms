@@ -4,6 +4,7 @@ import com.ufc.quixada.bookworms.data.remote.OpenLibraryBookDetailsDto
 import com.ufc.quixada.bookworms.data.remote.OpenLibraryRatingResponse
 import com.ufc.quixada.bookworms.data.remote.OpenLibrarySearchResponse
 import com.ufc.quixada.bookworms.domain.model.Book
+import com.ufc.quixada.bookworms.domain.repository.BookResult
 import com.ufc.quixada.bookworms.domain.repository.OpenLibraryRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -19,35 +20,51 @@ class OpenLibraryRepositoryImpl @Inject constructor(
     private val apiBase = "https://openlibrary.org/search.json"
     private val detailsBase = "https://openlibrary.org" // /books/ ou /works/
 
-    override suspend fun searchBooks(query: String): Result<List<Book>> {
+    override suspend fun searchBooks(query: String): BookResult {
         return try {
             val response: OpenLibrarySearchResponse = client.get(apiBase) {
-                parameter("q", "title:($query) AND language:por")
+                parameter("q", query)
                 parameter("fields", "key,title,author_name,cover_i,editions,editions.title,editions.language,editions.cover_i,editions.key,editions.isbn")
                 parameter("limit", 12)
             }.body()
 
             val books = response.docs.mapNotNull { doc ->
                 val ptEditions = doc.editions?.docs?.filter {
-                    it.language?.any { lang -> lang.contains("por") } == true
+                    it.language?.any { lang -> lang.contains("por", ignoreCase = true) } == true
                 } ?: emptyList()
 
-                if (ptEditions.isEmpty()) return@mapNotNull null
+                val finalTitle: String
+                val finalCoverId: Int?
+                val finalKey: String
+                val finalIsbn: String?
 
-                val bestEdition = ptEditions.maxByOrNull { it.coverId != null }!!
+                if (ptEditions.isNotEmpty()) {
+                    val bestEdition = ptEditions.maxByOrNull { it.coverId != null }!!
+                    finalTitle = bestEdition.title
+                    finalCoverId = bestEdition.coverId
+                    finalKey = bestEdition.key
+                    finalIsbn = bestEdition.isbn?.firstOrNull()
+                } else {
+                    finalTitle = doc.title
+                    finalCoverId = doc.converId
+                    finalKey = doc.key
+                    val bestAnyEdition = doc.editions?.docs?.maxByOrNull { it.coverId != null }
+                    finalIsbn = bestAnyEdition?.isbn?.firstOrNull()
+                }
+
                 Book(
-                    bookId = bestEdition.key,
-                    titulo = bestEdition.title,
+                    bookId = finalKey,
+                    titulo = finalTitle,
                     autor = doc.authorName?.joinToString(", ") ?: "Autor Desconhecido",
-                    capaUrl = getCoverUrl(bestEdition.coverId ?: doc.converId),
+                    capaUrl = getCoverUrl(finalCoverId),
                     fonteApi = "OpenLibrary",
-                    isbn = bestEdition.isbn?.firstOrNull()
+                    isbn = finalIsbn
                 )
             }
-            Result.success(books)
+            BookResult.Success(books)
         } catch (e: Exception) {
             e.printStackTrace()
-            Result.failure(e)
+            BookResult.Error(e.message ?: "Erro interno")
         }
     }
 
@@ -75,11 +92,19 @@ class OpenLibraryRepositoryImpl @Inject constructor(
 
             val ratings = rattingsDeferred.await()
             val details = detailsDeferred.await()
+            
+            val descriptionText = details?.description?.let { jsonElement ->
+                if (jsonElement is kotlinx.serialization.json.JsonObject) {
+                    jsonElement["value"]?.toString()?.removeSurrounding("\"")
+                } else {
+                    jsonElement.toString().removeSurrounding("\"")
+                }
+            } ?: "Sinopse indisponível."
 
             val book = Book(
                 bookId = editionKey ?: workKey,
-                sinopse = details?.description?.value ?: "Sinopse indisponível.",
-                notaApiExterna = ratings?.sumary?.average ?: 0f,
+                sinopse = descriptionText,
+                notaApiExterna = ratings?.summary?.average ?: 0f,
                 isbn = details?.isbn13?.joinToString(", ") ?: details?.isbn10?.joinToString(", ")
             )
             Result.success(book)
