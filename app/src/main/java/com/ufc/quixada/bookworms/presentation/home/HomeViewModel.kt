@@ -2,9 +2,11 @@ package com.ufc.quixada.bookworms.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ufc.quixada.bookworms.domain.model.Book
 import com.ufc.quixada.bookworms.domain.repository.BookResult
 import com.ufc.quixada.bookworms.domain.usecase.GetBooksUseCase
 import com.ufc.quixada.bookworms.domain.usecase.ManageFavoriteUseCase
+import com.ufc.quixada.bookworms.domain.usecase.SaveBookUseCase
 import com.ufc.quixada.bookworms.domain.usecase.SearchBooksUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -20,7 +22,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val getBooksUseCase: GetBooksUseCase,
     private val searchBooksUseCase: SearchBooksUseCase,
-    private val manageFavoriteUseCase: ManageFavoriteUseCase
+    private val manageFavoriteUseCase: ManageFavoriteUseCase,
+    private val saveBookUseCase: SaveBookUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -72,6 +75,13 @@ class HomeViewModel @Inject constructor(
         searchJob = viewModelScope.launch {
             delay(500)
             performSearch(newQuery)
+        }
+    }
+
+    fun onBookSelected(book: Book, navigate: (String) -> Unit) {
+        viewModelScope.launch {
+            saveBookUseCase(book)
+            navigate(book.bookId)
         }
     }
 

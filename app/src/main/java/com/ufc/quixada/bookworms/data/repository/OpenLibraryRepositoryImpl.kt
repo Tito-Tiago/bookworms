@@ -53,7 +53,7 @@ class OpenLibraryRepositoryImpl @Inject constructor(
                 }
 
                 Book(
-                    bookId = finalKey,
+                    bookId = finalKey.substringAfterLast("/"),
                     titulo = finalTitle,
                     autor = doc.authorName?.joinToString(", ") ?: "Autor Desconhecido",
                     capaUrl = getCoverUrl(finalCoverId),
@@ -68,41 +68,39 @@ class OpenLibraryRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getBookDetails(
-        workKey: String,
-        editionKey: String?
-    ): Result<Book> = coroutineScope {
+    override suspend fun getBookDetails(bookId: String): Result<Book> = coroutineScope {
         try {
+            val isWork = bookId.endsWith("W")
+            val endpoint = if (isWork) "works" else "books"
+
+            //busca avaliações
             val rattingsDeferred = async {
                 try {
-                    // /works/OL123W -> OL123W
-                    val workId = workKey.substringAfterLast("/")
-                    client.get("$detailsBase/works/$workId/ratings.json").body<OpenLibraryRatingResponse>()
+                    client.get("$detailsBase/works/$bookId/ratings.json").body<OpenLibraryRatingResponse>()
                 } catch (e: Exception) { null }
             }
 
+            //busca detalhes
             val detailsDeferred = async {
-                if (editionKey != null) {
-                    try {
-                        val editionId = editionKey.substringAfterLast("/")
-                        client.get("$detailsBase/books/$editionId.json").body<OpenLibraryBookDetailsDto>()
-                    } catch (e: Exception) { null }
-                } else null
+                try {
+                    client.get("$detailsBase/$endpoint/$bookId.json").body<OpenLibraryBookDetailsDto>()
+                } catch (e: Exception) { null }
             }
 
             val ratings = rattingsDeferred.await()
             val details = detailsDeferred.await()
-            
+
+            //parse da descrição
             val descriptionText = details?.description?.let { jsonElement ->
                 if (jsonElement is kotlinx.serialization.json.JsonObject) {
                     jsonElement["value"]?.toString()?.removeSurrounding("\"")
                 } else {
                     jsonElement.toString().removeSurrounding("\"")
                 }
-            } ?: "Sinopse indisponível."
+            } ?: ""
 
             val book = Book(
-                bookId = editionKey ?: workKey,
+                bookId = bookId,
                 sinopse = descriptionText,
                 notaApiExterna = ratings?.summary?.average ?: 0f,
                 isbn = details?.isbn13?.joinToString(", ") ?: details?.isbn10?.joinToString(", ")

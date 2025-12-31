@@ -131,7 +131,11 @@ fun HomeScreen(
                                 BookItem(
                                     book = book,
                                     isFavorite = uiState.favoriteBookIds.contains(book.bookId), // Verifica favorito
-                                    onClick = { onBookClick(book.bookId) }
+                                    onClick = {
+                                        viewModel.onBookSelected(book) { id ->
+                                            onBookClick(id)
+                                        }
+                                    }
                                 )
                             }
                         }

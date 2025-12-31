@@ -4,5 +4,5 @@ import com.ufc.quixada.bookworms.domain.model.Book
 
 interface OpenLibraryRepository {
     suspend fun searchBooks(query: String): BookResult
-    suspend fun getBookDetails(workKey: String, editionKey: String?): Result<Book>
+    suspend fun getBookDetails(bookId: String): Result<Book>
 }
