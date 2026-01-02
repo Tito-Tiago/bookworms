@@ -16,7 +16,7 @@ data class OpenLibraryDocDto(
     @SerialName("author_name")
     val authorName: List<String>? = null,
     @SerialName("cover_i")
-    val converId: Int? = null,
+    val coverId: Int? = null,
     val editions: OpenLibraryEditionsDto? = null
 )
 

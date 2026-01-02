@@ -15,5 +15,5 @@ data class BookEntity (
     val notaMediaComunidade: Float,
     val notaApiExterna: Float?,
     val fonteApi: String?, // "GOOGLE", "OPEN_LIBRARY"
-    val numAvaliacoes: Int,
+    val numAvaliacoes: Int
 )

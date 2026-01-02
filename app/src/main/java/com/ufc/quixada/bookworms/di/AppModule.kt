@@ -97,7 +97,7 @@ object AppModule {
             }
 
             install(ContentNegotiation) { // JSON serialization/deserialization
-                json(Json{
+                json(Json {
                     prettyPrint = true
                     isLenient = true
                     ignoreUnknownKeys = true

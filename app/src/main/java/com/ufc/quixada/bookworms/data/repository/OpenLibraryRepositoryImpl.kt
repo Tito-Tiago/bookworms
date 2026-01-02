@@ -39,14 +39,14 @@ class OpenLibraryRepositoryImpl @Inject constructor(
                 val finalIsbn: String?
 
                 if (ptEditions.isNotEmpty()) {
-                    val bestEdition = ptEditions.maxByOrNull { it.coverId != null }!!
+                    val bestEdition = ptEditions.maxByOrNull { it.coverId != null } ?: ptEditions.first()
                     finalTitle = bestEdition.title
                     finalCoverId = bestEdition.coverId
                     finalKey = bestEdition.key
                     finalIsbn = bestEdition.isbn?.firstOrNull()
                 } else {
                     finalTitle = doc.title
-                    finalCoverId = doc.converId
+                    finalCoverId = doc.coverId
                     finalKey = doc.key
                     val bestAnyEdition = doc.editions?.docs?.maxByOrNull { it.coverId != null }
                     finalIsbn = bestAnyEdition?.isbn?.firstOrNull()
@@ -74,7 +74,7 @@ class OpenLibraryRepositoryImpl @Inject constructor(
             val endpoint = if (isWork) "works" else "books"
 
             //busca avaliações
-            val rattingsDeferred = async {
+            val ratingsDeferred = async {
                 try {
                     client.get("$detailsBase/works/$bookId/ratings.json").body<OpenLibraryRatingResponse>()
                 } catch (e: Exception) { null }
@@ -87,7 +87,7 @@ class OpenLibraryRepositoryImpl @Inject constructor(
                 } catch (e: Exception) { null }
             }
 
-            val ratings = rattingsDeferred.await()
+            val ratings = ratingsDeferred.await()
             val details = detailsDeferred.await()
 
             //parse da descrição
