@@ -1,6 +1,8 @@
 package com.ufc.quixada.bookworms.data.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.ufc.quixada.bookworms.data.local.dao.BookDao
+import com.ufc.quixada.bookworms.data.local.entity.BookEntity
 import com.ufc.quixada.bookworms.domain.model.Book
 import com.ufc.quixada.bookworms.domain.repository.BookRepository
 import com.ufc.quixada.bookworms.domain.repository.BookResult
@@ -9,7 +11,8 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 class BookRepositoryImpl @Inject constructor(
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val bookDao: BookDao
 ) : BookRepository {
 
     override suspend fun getBooks(): BookResult {
@@ -31,6 +34,11 @@ class BookRepositoryImpl @Inject constructor(
 
     override suspend fun getBook(bookId: String): SingleBookResult {
         return try {
+            val localBook = bookDao.getBook(bookId)
+            if (localBook != null) {
+                return SingleBookResult.Success(mapEntityToDomain(localBook))
+            }
+
             val document = firestore.collection("books")
                 .document(bookId)
                 .get()
@@ -66,4 +74,42 @@ class BookRepositoryImpl @Inject constructor(
             BookResult.Error(e.message ?: "Erro ao buscar livros")
         }
     }
+
+    override suspend fun saveBook(book: Book) {
+        val entity = BookEntity(
+            bookId = book.bookId,
+            titulo = book.titulo,
+            autor = book.autor,
+            sinopse = book.sinopse,
+            capaUrl = book.capaUrl,
+            isbn = book.isbn,
+            notaMediaComunidade = book.notaMediaComunidade,
+            notaApiExterna = book.notaApiExterna,
+            fonteApi = book.fonteApi,
+            numAvaliacoes = book.numAvaliacoes
+        )
+        bookDao.insertBook(entity)
+
+        try {
+            firestore.collection("books")
+                .document(book.bookId)
+                .set(book)
+                .await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun mapEntityToDomain(entity: BookEntity) = Book(
+        bookId = entity.bookId,
+        titulo = entity.titulo,
+        autor = entity.autor,
+        sinopse = entity.sinopse,
+        capaUrl = entity.capaUrl,
+        isbn = entity.isbn,
+        notaMediaComunidade = entity.notaMediaComunidade,
+        notaApiExterna = entity.notaApiExterna,
+        fonteApi = entity.fonteApi,
+        numAvaliacoes = entity.numAvaliacoes
+    )
 }

@@ -16,4 +16,5 @@ interface BookRepository {
     suspend fun getBooks(): BookResult
     suspend fun getBook(bookId: String): SingleBookResult
     suspend fun searchBooks(query: String): BookResult
+    suspend fun saveBook(book: Book)
 }
