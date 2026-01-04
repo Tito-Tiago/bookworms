@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
@@ -52,6 +51,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -98,7 +98,7 @@ fun LoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primary)
+            .background(MaterialTheme.colorScheme.primary) // Fundo Verde
             .verticalScroll(rememberScrollState())
             .padding(top = 48.dp, bottom = 48.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -114,10 +114,9 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Icon(
-                imageVector = Icons.Filled.Book,
+            Image(
+                painter = painterResource(id = R.drawable.ic_logo),
                 contentDescription = "Logo Bookworms",
-                tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(96.dp)
             )
 
@@ -274,7 +273,8 @@ fun LoginScreen(
                     text = "Não tem uma conta? Cadastre-se",
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        textDecoration = TextDecoration.Underline
                     )
                 )
             }
