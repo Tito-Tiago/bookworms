@@ -1,19 +1,33 @@
 package com.ufc.quixada.bookworms.di
 
+import android.content.Context
+import androidx.room.Room
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.ufc.quixada.bookworms.data.local.BookDatabase
+import com.ufc.quixada.bookworms.data.local.dao.BookDao
 import com.ufc.quixada.bookworms.data.repository.AuthRepositoryImpl
 import com.ufc.quixada.bookworms.data.repository.BookRepositoryImpl
 import com.ufc.quixada.bookworms.data.repository.FavoriteRepositoryImpl
+import com.ufc.quixada.bookworms.data.repository.OpenLibraryRepositoryImpl
 import com.ufc.quixada.bookworms.data.repository.UserRepositoryImpl
 import com.ufc.quixada.bookworms.domain.repository.AuthRepository
 import com.ufc.quixada.bookworms.domain.repository.BookRepository
 import com.ufc.quixada.bookworms.domain.repository.FavoriteRepository
+import com.ufc.quixada.bookworms.domain.repository.OpenLibraryRepository
 import com.ufc.quixada.bookworms.domain.repository.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logging
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 import javax.inject.Singleton
 
 @Module
@@ -44,9 +58,10 @@ object AppModule {
     @Provides
     @Singleton
     fun provideBookRepository(
-        firestore: FirebaseFirestore
+        firestore: FirebaseFirestore,
+        bookDao: BookDao
     ): BookRepository {
-        return BookRepositoryImpl(firestore)
+        return BookRepositoryImpl(firestore, bookDao)
     }
 
     @Provides
@@ -63,5 +78,47 @@ object AppModule {
         firestore: FirebaseFirestore
     ): FavoriteRepository {
         return FavoriteRepositoryImpl(firestore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideOpenLibraryRepository(
+        client: HttpClient
+    ): OpenLibraryRepository {
+        return OpenLibraryRepositoryImpl(client)
+    }
+
+    @Provides
+    @Singleton
+    fun provideHttpClient(): HttpClient {
+        return HttpClient(CIO) {
+            install(Logging) { //logging plugin
+                level = LogLevel.ALL
+            }
+
+            install(ContentNegotiation) { // JSON serialization/deserialization
+                json(Json {
+                    prettyPrint = true
+                    isLenient = true
+                    ignoreUnknownKeys = true
+                })
+            }
+        }
+    }
+
+    @Provides
+    @Singleton
+    fun provideBookDatabase(@ApplicationContext context: Context): BookDatabase {
+        return Room.databaseBuilder(
+            context,
+            BookDatabase::class.java,
+            "bookworms_db"
+        ).build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideBookDao(database: BookDatabase): BookDao {
+        return database.bookDao
     }
 }

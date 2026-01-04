@@ -58,8 +58,7 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
 
-    Scaffold(
-    ) { paddingValues ->
+    Scaffold { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -132,7 +131,11 @@ fun HomeScreen(
                                 BookItem(
                                     book = book,
                                     isFavorite = uiState.favoriteBookIds.contains(book.bookId), // Verifica favorito
-                                    onClick = { onBookClick(book.bookId) }
+                                    onClick = {
+                                        viewModel.onBookSelected(book) { id ->
+                                            onBookClick(id)
+                                        }
+                                    }
                                 )
                             }
                         }
