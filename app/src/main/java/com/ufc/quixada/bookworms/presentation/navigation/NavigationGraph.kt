@@ -1,7 +1,6 @@
 package com.ufc.quixada.bookworms.presentation.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -10,17 +9,14 @@ import androidx.navigation.navArgument
 import com.ufc.quixada.bookworms.presentation.auth.login.LoginScreen
 import com.ufc.quixada.bookworms.presentation.auth.register.RegisterScreen
 import com.ufc.quixada.bookworms.presentation.book_details.BookDetailsScreen
-import com.ufc.quixada.bookworms.presentation.home.HomeScreen
-import com.ufc.quixada.bookworms.presentation.profile.ProfileScreen
+import com.ufc.quixada.bookworms.presentation.main.MainScreen
 import com.ufc.quixada.bookworms.presentation.splash.SplashScreen
 
 sealed class Screen(val route: String) {
     data object Splash : Screen("splash")
     data object Login : Screen("login")
     data object Register : Screen("register")
-    data object Home : Screen("home")
-    data object Profile : Screen("profile")
-
+    data object Main : Screen("main") // Nova rota principal que contém as abas
     data object BookDetails : Screen("book_details/{bookId}") {
         fun createRoute(bookId: String) = "book_details/$bookId"
     }
@@ -51,7 +47,7 @@ fun NavigationGraph() {
                     navController.navigate(Screen.Register.route)
                 },
                 onLoginSuccess = {
-                    navController.navigate(Screen.Home.route) {
+                    navController.navigate(Screen.Main.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 }
@@ -64,37 +60,22 @@ fun NavigationGraph() {
                     navController.popBackStack()
                 },
                 onRegisterSuccess = {
-                    navController.navigate(Screen.Home.route) {
+                    navController.navigate(Screen.Main.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 }
             )
         }
 
-        composable(Screen.Profile.route) {
-            ProfileScreen(
-                onNavigateBack = {
-                    navController.popBackStack()
-                },
+        composable(Screen.Main.route) {
+            MainScreen(
                 onLogout = {
                     navController.navigate(Screen.Login.route) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
-            )
-        }
-
-        composable(Screen.Home.route) {
-            HomeScreen(
-                onBookClick = { bookId ->
-                    if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
-                        navController.navigate(Screen.BookDetails.createRoute(bookId))
+                        popUpTo(Screen.Main.route) { inclusive = true }
                     }
                 },
-                onProfileClick = {
-                    if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
-                        navController.navigate(Screen.Profile.route)
-                    }
+                onBookClick = { bookId ->
+                    navController.navigate(Screen.BookDetails.createRoute(bookId))
                 }
             )
         }
@@ -105,9 +86,7 @@ fun NavigationGraph() {
         ) {
             BookDetailsScreen(
                 onNavigateBack = {
-                    if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
-                        navController.popBackStack()
-                    }
+                    navController.popBackStack()
                 }
             )
         }
