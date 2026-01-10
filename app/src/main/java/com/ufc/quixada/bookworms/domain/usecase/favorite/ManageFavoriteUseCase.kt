@@ -1,4 +1,4 @@
-package com.ufc.quixada.bookworms.domain.usecase
+package com.ufc.quixada.bookworms.domain.usecase.favorite
 
 import com.ufc.quixada.bookworms.domain.repository.AuthRepository
 import com.ufc.quixada.bookworms.domain.repository.FavoriteListResult

@@ -1,4 +1,4 @@
-package com.ufc.quixada.bookworms.domain.usecase
+package com.ufc.quixada.bookworms.domain.usecase.review
 
 import com.ufc.quixada.bookworms.domain.repository.BookRepository
 import com.ufc.quixada.bookworms.domain.repository.ReviewRepository

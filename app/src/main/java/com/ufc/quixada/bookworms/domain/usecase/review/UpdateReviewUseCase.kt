@@ -1,11 +1,9 @@
-package com.ufc.quixada.bookworms.domain.usecase
+package com.ufc.quixada.bookworms.domain.usecase.review
 
 import com.ufc.quixada.bookworms.domain.model.Review
 import com.ufc.quixada.bookworms.domain.repository.ReviewRepository
-import com.ufc.quixada.bookworms.domain.repository.ReviewResult
 import com.ufc.quixada.bookworms.domain.repository.SingleReviewResult
 import java.util.Date
-import java.util.UUID
 import javax.inject.Inject
 
 class UpdateReviewUseCase @Inject constructor(

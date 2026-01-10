@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ufc.quixada.bookworms.domain.repository.FavoriteResult
 import com.ufc.quixada.bookworms.domain.repository.SingleBookResult
-import com.ufc.quixada.bookworms.domain.usecase.GetBookDetailsUseCase
-import com.ufc.quixada.bookworms.domain.usecase.ManageFavoriteUseCase
+import com.ufc.quixada.bookworms.domain.usecase.book.GetBookDetailsUseCase
+import com.ufc.quixada.bookworms.domain.usecase.favorite.ManageFavoriteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

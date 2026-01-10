@@ -4,10 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ufc.quixada.bookworms.domain.model.Book
 import com.ufc.quixada.bookworms.domain.repository.BookResult
-import com.ufc.quixada.bookworms.domain.usecase.GetBooksUseCase
-import com.ufc.quixada.bookworms.domain.usecase.ManageFavoriteUseCase
-import com.ufc.quixada.bookworms.domain.usecase.SaveBookUseCase
-import com.ufc.quixada.bookworms.domain.usecase.SearchBooksUseCase
+import com.ufc.quixada.bookworms.domain.usecase.book.GetBooksUseCase
+import com.ufc.quixada.bookworms.domain.usecase.favorite.ManageFavoriteUseCase
+import com.ufc.quixada.bookworms.domain.usecase.book.SaveBookUseCase
+import com.ufc.quixada.bookworms.domain.usecase.book.SearchBooksUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
