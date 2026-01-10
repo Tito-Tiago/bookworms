@@ -12,11 +12,15 @@ sealed class SingleReviewResult {
     data class Error(val message: String) : SingleReviewResult()
 }
 
+sealed class SimpleResult {
+    object Success : SimpleResult()
+    data class Error(val message: String) : SimpleResult()
+}
 interface ReviewRepository {
     suspend fun getReviewsByBook(bookId: String) : ReviewResult
     suspend fun addReview(review: Review) : SingleReviewResult
     suspend fun updateReview(review: Review) : SingleReviewResult
-    suspend fun deleteReview(reviewId: String) : SingleReviewResult
+    suspend fun deleteReview(reviewId: String, bookId: String) : SimpleResult
     suspend fun getReviewsByUser(userId: String) : ReviewResult
     suspend fun getReviewById(reviewId: String) : SingleReviewResult
 }
