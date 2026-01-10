@@ -14,4 +14,9 @@ sealed class SingleReviewResult {
 
 interface ReviewRepository {
     suspend fun getReviewsByBook(bookId: String) : ReviewResult
+    suspend fun addReview(review: Review) : SingleReviewResult
+    suspend fun updateReview(review: Review) : SingleReviewResult
+    suspend fun deleteReview(reviewId: String) : SingleReviewResult
+    suspend fun getReviewsByUser(userId: String) : ReviewResult
+    suspend fun getReviewById(reviewId: String) : SingleReviewResult
 }
