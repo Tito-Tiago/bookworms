@@ -9,11 +9,13 @@ import com.ufc.quixada.bookworms.data.local.dao.BookDao
 import com.ufc.quixada.bookworms.data.repository.AuthRepositoryImpl
 import com.ufc.quixada.bookworms.data.repository.BookRepositoryImpl
 import com.ufc.quixada.bookworms.data.repository.FavoriteRepositoryImpl
+import com.ufc.quixada.bookworms.data.repository.FollowRepositoryImpl // Import novo
 import com.ufc.quixada.bookworms.data.repository.OpenLibraryRepositoryImpl
 import com.ufc.quixada.bookworms.data.repository.UserRepositoryImpl
 import com.ufc.quixada.bookworms.domain.repository.AuthRepository
 import com.ufc.quixada.bookworms.domain.repository.BookRepository
 import com.ufc.quixada.bookworms.domain.repository.FavoriteRepository
+import com.ufc.quixada.bookworms.domain.repository.FollowRepository // Import novo
 import com.ufc.quixada.bookworms.domain.repository.OpenLibraryRepository
 import com.ufc.quixada.bookworms.domain.repository.UserRepository
 import dagger.Module
@@ -80,6 +82,16 @@ object AppModule {
         return FavoriteRepositoryImpl(firestore)
     }
 
+    // --- ADICIONE ESTA FUNÇÃO ---
+    @Provides
+    @Singleton
+    fun provideFollowRepository(
+        firestore: FirebaseFirestore
+    ): FollowRepository {
+        return FollowRepositoryImpl(firestore)
+    }
+    // -----------------------------
+
     @Provides
     @Singleton
     fun provideOpenLibraryRepository(
@@ -92,11 +104,11 @@ object AppModule {
     @Singleton
     fun provideHttpClient(): HttpClient {
         return HttpClient(CIO) {
-            install(Logging) { //logging plugin
+            install(Logging) {
                 level = LogLevel.ALL
             }
 
-            install(ContentNegotiation) { // JSON serialization/deserialization
+            install(ContentNegotiation) {
                 json(Json {
                     prettyPrint = true
                     isLenient = true
