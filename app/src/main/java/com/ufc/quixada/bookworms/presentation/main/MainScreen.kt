@@ -22,15 +22,18 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.google.firebase.auth.FirebaseAuth
 import com.ufc.quixada.bookworms.presentation.feed.FeedScreen
 import com.ufc.quixada.bookworms.presentation.home.HomeScreen
 import com.ufc.quixada.bookworms.presentation.navigation.BottomNavItem
 import com.ufc.quixada.bookworms.presentation.notification.NotificationScreen
-import com.ufc.quixada.bookworms.presentation.profile.ProfileScreen
+import com.ufc.quixada.bookworms.presentation.public_profile.PublicProfileScreen
 
 @Composable
 fun MainScreen(
@@ -38,10 +41,15 @@ fun MainScreen(
     onBookClick: (String) -> Unit
 ) {
     val navController = rememberNavController()
+    // Obtemos o ID do usuário atual para usar no link do perfil
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
 
     Scaffold(
         bottomBar = {
-            BottomBar(navController = navController)
+            BottomBar(
+                navController = navController,
+                currentUserId = currentUserId
+            )
         }
     ) { innerPadding ->
         NavHost(
@@ -62,10 +70,19 @@ fun MainScreen(
             composable(BottomNavItem.Notifications.route) {
                 NotificationScreen()
             }
-            composable(BottomNavItem.Profile.route) {
-                ProfileScreen(
-                    onNavigateBack = { /* Não precisa voltar na aba principal */ },
-                    onLogout = onLogout
+
+            // Rota dinâmica para o Perfil Público
+            composable(
+                route = "public_profile/{userId}",
+                arguments = listOf(navArgument("userId") { type = NavType.StringType })
+            ) {
+                PublicProfileScreen(
+                    onNavigateBack = {
+                        // Se estiver na aba principal, talvez não queira fazer nada ou voltar para o feed
+                        if (navController.previousBackStackEntry != null) {
+                            navController.popBackStack()
+                        }
+                    }
                 )
             }
         }
@@ -73,7 +90,10 @@ fun MainScreen(
 }
 
 @Composable
-fun BottomBar(navController: NavHostController) {
+fun BottomBar(
+    navController: NavHostController,
+    currentUserId: String
+) {
     val items = listOf(
         BottomNavItem.Feed,
         BottomNavItem.Catalog,
@@ -87,7 +107,7 @@ fun BottomBar(navController: NavHostController) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, bottom = 24.dp) // Margem para "flutuar"
+            .padding(start = 16.dp, end = 16.dp, bottom = 24.dp)
     ) {
         NavigationBar(
             modifier = Modifier
@@ -99,7 +119,15 @@ fun BottomBar(navController: NavHostController) {
             tonalElevation = 8.dp
         ) {
             items.forEach { item ->
-                val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
+                // Lógica especial para verificar se o item selecionado é o Perfil
+                val isProfile = item == BottomNavItem.Profile
+                val isProfileRoute = currentDestination?.route?.startsWith("public_profile") == true
+
+                val selected = if (isProfile) {
+                    isProfileRoute
+                } else {
+                    currentDestination?.hierarchy?.any { it.route == item.route } == true
+                }
 
                 NavigationBarItem(
                     icon = {
@@ -110,7 +138,14 @@ fun BottomBar(navController: NavHostController) {
                     },
                     selected = selected,
                     onClick = {
-                        navController.navigate(item.route) {
+                        // Se clicar no Perfil, monta a rota com o ID do usuário logado
+                        val route = if (isProfile) {
+                            "public_profile/$currentUserId"
+                        } else {
+                            item.route
+                        }
+
+                        navController.navigate(route) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
                             }

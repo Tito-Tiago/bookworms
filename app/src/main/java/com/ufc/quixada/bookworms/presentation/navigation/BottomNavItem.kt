@@ -11,5 +11,5 @@ sealed class BottomNavItem(val route: String, val title: String, val icon: Image
     data object Feed : BottomNavItem("feed", "Feed", Icons.Default.Home)
     data object Catalog : BottomNavItem("catalog", "Catálogo", Icons.Default.Search)
     data object Notifications : BottomNavItem("notifications", "Notificações", Icons.Default.Notifications)
-    data object Profile : BottomNavItem("profile", "Perfil", Icons.Default.Person)
+    data object Profile : BottomNavItem("publicprofile", "Perfil", Icons.Default.Person)
 }
