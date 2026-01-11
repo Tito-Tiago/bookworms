@@ -3,9 +3,9 @@ package com.ufc.quixada.bookworms.presentation.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ufc.quixada.bookworms.domain.repository.UserResult
-import com.ufc.quixada.bookworms.domain.usecase.GetUserProfileUseCase
-import com.ufc.quixada.bookworms.domain.usecase.LogoutUseCase
-import com.ufc.quixada.bookworms.domain.usecase.UpdateProfileUseCase
+import com.ufc.quixada.bookworms.domain.usecase.user.GetUserProfileUseCase
+import com.ufc.quixada.bookworms.domain.usecase.auth.LogoutUseCase
+import com.ufc.quixada.bookworms.domain.usecase.user.UpdateProfileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

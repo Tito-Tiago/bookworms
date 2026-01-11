@@ -1,5 +1,6 @@
-package com.ufc.quixada.bookworms.domain.usecase
+package com.ufc.quixada.bookworms.domain.usecase.auth
 
+import android.util.Patterns
 import com.ufc.quixada.bookworms.domain.repository.AuthRepository
 import com.ufc.quixada.bookworms.domain.repository.AuthResult
 import javax.inject.Inject
@@ -12,7 +13,7 @@ class RegisterUseCase @Inject constructor(
             return AuthResult.Error("Nome não pode estar vazio")
         }
 
-        if (email.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        if (email.isBlank() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             return AuthResult.Error("E-mail inválido")
         }
 

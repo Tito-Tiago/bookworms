@@ -3,7 +3,7 @@ package com.ufc.quixada.bookworms.presentation.auth.register
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ufc.quixada.bookworms.domain.repository.AuthResult
-import com.ufc.quixada.bookworms.domain.usecase.RegisterUseCase
+import com.ufc.quixada.bookworms.domain.usecase.auth.RegisterUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
