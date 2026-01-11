@@ -3,10 +3,12 @@ package com.ufc.quixada.bookworms.presentation.book_details
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ufc.quixada.bookworms.domain.model.ShelfType
 import com.ufc.quixada.bookworms.domain.repository.FavoriteResult
 import com.ufc.quixada.bookworms.domain.repository.SingleBookResult
 import com.ufc.quixada.bookworms.domain.usecase.GetBookDetailsUseCase
 import com.ufc.quixada.bookworms.domain.usecase.ManageFavoriteUseCase
+import com.ufc.quixada.bookworms.domain.usecase.ManageShelfUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,6 +21,7 @@ import javax.inject.Inject
 class BookDetailsViewModel @Inject constructor(
     private val getBookDetailsUseCase: GetBookDetailsUseCase,
     private val manageFavoriteUseCase: ManageFavoriteUseCase,
+    private val manageShelfUseCase: ManageShelfUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -36,8 +39,8 @@ class BookDetailsViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
             val bookResult = getBookDetailsUseCase(id)
-
             val favResult = manageFavoriteUseCase.checkFavoriteStatus(id)
+            val shelfStatus = manageShelfUseCase.getStatus(id)
 
             if (bookResult is SingleBookResult.Success) {
                 val isFav = if (favResult is FavoriteResult.Success) favResult.isFavorite else false
@@ -46,7 +49,8 @@ class BookDetailsViewModel @Inject constructor(
                     it.copy(
                         isLoading = false,
                         book = bookResult.data,
-                        isFavorite = isFav
+                        isFavorite = isFav,
+                        shelfType = shelfStatus
                     )
                 }
             } else if (bookResult is SingleBookResult.Error) {
@@ -73,6 +77,18 @@ class BookDetailsViewModel @Inject constructor(
                         errorMessage = result.message
                     )
                 }
+            }
+        }
+    }
+
+    fun onShelfSelected(shelfType: ShelfType) {
+        val currentId = bookId ?: return
+        viewModelScope.launch {
+            val result = manageShelfUseCase(currentId, shelfType)
+            if (result.isSuccess) {
+                _uiState.update { it.copy(shelfType = shelfType) }
+            } else {
+                _uiState.update { it.copy(errorMessage = "Erro ao atualizar estante") }
             }
         }
     }

@@ -9,15 +9,17 @@ import com.ufc.quixada.bookworms.data.local.dao.BookDao
 import com.ufc.quixada.bookworms.data.repository.AuthRepositoryImpl
 import com.ufc.quixada.bookworms.data.repository.BookRepositoryImpl
 import com.ufc.quixada.bookworms.data.repository.FavoriteRepositoryImpl
-import com.ufc.quixada.bookworms.data.repository.FollowRepositoryImpl // Import novo
+import com.ufc.quixada.bookworms.data.repository.FollowRepositoryImpl
 import com.ufc.quixada.bookworms.data.repository.OpenLibraryRepositoryImpl
 import com.ufc.quixada.bookworms.data.repository.UserRepositoryImpl
+import com.ufc.quixada.bookworms.data.repository.ShelfRepositoryImpl
 import com.ufc.quixada.bookworms.domain.repository.AuthRepository
 import com.ufc.quixada.bookworms.domain.repository.BookRepository
 import com.ufc.quixada.bookworms.domain.repository.FavoriteRepository
-import com.ufc.quixada.bookworms.domain.repository.FollowRepository // Import novo
+import com.ufc.quixada.bookworms.domain.repository.FollowRepository
 import com.ufc.quixada.bookworms.domain.repository.OpenLibraryRepository
 import com.ufc.quixada.bookworms.domain.repository.UserRepository
+import com.ufc.quixada.bookworms.domain.repository.ShelfRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -82,7 +84,6 @@ object AppModule {
         return FavoriteRepositoryImpl(firestore)
     }
 
-    // --- ADICIONE ESTA FUNÇÃO ---
     @Provides
     @Singleton
     fun provideFollowRepository(
@@ -90,7 +91,14 @@ object AppModule {
     ): FollowRepository {
         return FollowRepositoryImpl(firestore)
     }
-    // -----------------------------
+
+    @Provides
+    @Singleton
+    fun provideShelfRepository(
+        firestore: FirebaseFirestore
+    ): ShelfRepository {
+        return ShelfRepositoryImpl(firestore)
+    }
 
     @Provides
     @Singleton
