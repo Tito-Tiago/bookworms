@@ -8,7 +8,7 @@ import com.ufc.quixada.bookworms.domain.repository.BookResult
 import com.ufc.quixada.bookworms.domain.usecase.favorite.ManageFavoriteUseCase
 import com.ufc.quixada.bookworms.domain.usecase.book.SaveBookUseCase
 import com.ufc.quixada.bookworms.domain.usecase.book.SearchBooksUseCase // Assumindo estar junto com SaveBook
-import com.ufc.quixada.bookworms.domain.usecase.SearchUsersUseCase // Mantido na raiz conforme Versão 1
+import com.ufc.quixada.bookworms.domain.usecase.user.SearchUsersUseCase // Corrected package
 // --------------------------
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview

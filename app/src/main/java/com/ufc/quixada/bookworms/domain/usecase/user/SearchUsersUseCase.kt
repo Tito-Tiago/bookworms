@@ -1,4 +1,4 @@
-package com.ufc.quixada.bookworms.domain.usecase
+package com.ufc.quixada.bookworms.domain.usecase.user
 
 import com.ufc.quixada.bookworms.domain.model.User
 import com.ufc.quixada.bookworms.domain.repository.UserRepository
@@ -9,7 +9,7 @@ class SearchUsersUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(query: String): Result<List<User>> {
         return try {
-            val users = userRepository.searchUsers(query.trim())
+            val users = userRepository.searchUsers(query)
             Result.success(users)
         } catch (e: Exception) {
             Result.failure(e)
