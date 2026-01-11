@@ -3,11 +3,13 @@ package com.ufc.quixada.bookworms.presentation.book_details
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ufc.quixada.bookworms.domain.model.ShelfType
 import com.ufc.quixada.bookworms.domain.repository.FavoriteResult
 import com.ufc.quixada.bookworms.domain.repository.SingleBookResult
-import com.ufc.quixada.bookworms.domain.repository.SingleReviewResult
 import com.ufc.quixada.bookworms.domain.usecase.book.GetBookDetailsUseCase
 import com.ufc.quixada.bookworms.domain.usecase.favorite.ManageFavoriteUseCase
+import com.ufc.quixada.bookworms.domain.usecase.shelf.ManageShelfUseCase
+import com.ufc.quixada.bookworms.domain.repository.SingleReviewResult
 import com.ufc.quixada.bookworms.domain.usecase.review.AddReviewUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +23,7 @@ import javax.inject.Inject
 class BookDetailsViewModel @Inject constructor(
     private val getBookDetailsUseCase: GetBookDetailsUseCase,
     private val manageFavoriteUseCase: ManageFavoriteUseCase,
+    private val manageShelfUseCase: ManageShelfUseCase,
     private val addReviewUseCase: AddReviewUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -41,6 +44,7 @@ class BookDetailsViewModel @Inject constructor(
             val bookResult = getBookDetailsUseCase(id)
 
             val favResult = manageFavoriteUseCase.checkFavoriteStatus(id)
+            val shelfStatus = manageShelfUseCase.getStatus(id)
 
             if (bookResult is SingleBookResult.Success) {
                 val isFav = if (favResult is FavoriteResult.Success) favResult.isFavorite else false
@@ -49,7 +53,8 @@ class BookDetailsViewModel @Inject constructor(
                     it.copy(
                         isLoading = false,
                         book = bookResult.data,
-                        isFavorite = isFav
+                        isFavorite = isFav,
+                        shelfType = shelfStatus
                     )
                 }
             } else if (bookResult is SingleBookResult.Error) {
@@ -74,6 +79,27 @@ class BookDetailsViewModel @Inject constructor(
                     it.copy(
                         isFavorite = currentStatus,
                         errorMessage = result.message
+                    )
+                }
+            }
+        }
+    }
+
+    fun onShelfSelected(shelfType: ShelfType) {
+        val currentId = bookId ?: return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            val result = manageShelfUseCase(currentId, shelfType)
+
+            result.onSuccess {
+                _uiState.update { it.copy(shelfType = shelfType, isLoading = false, errorMessage = null) }
+            }.onFailure { exception ->
+                android.util.Log.e("ShelfError", "Falha ao salvar na estante", exception)
+
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Erro: ${exception.localizedMessage}"
                     )
                 }
             }

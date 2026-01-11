@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.navigation.compose.rememberNavController // Import necessário
 import com.ufc.quixada.bookworms.presentation.navigation.NavigationGraph
 import com.ufc.quixada.bookworms.presentation.ui.theme.BookwormsTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -15,7 +16,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             BookwormsTheme {
-                NavigationGraph()
+                // Criação do NavController na raiz da aplicação
+                val navController = rememberNavController()
+
+                // Passa o navController para o grafo de navegação
+                NavigationGraph(navController = navController)
             }
         }
     }

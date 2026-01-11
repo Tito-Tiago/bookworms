@@ -9,13 +9,17 @@ import com.ufc.quixada.bookworms.data.local.dao.BookDao
 import com.ufc.quixada.bookworms.data.repository.AuthRepositoryImpl
 import com.ufc.quixada.bookworms.data.repository.BookRepositoryImpl
 import com.ufc.quixada.bookworms.data.repository.FavoriteRepositoryImpl
+import com.ufc.quixada.bookworms.data.repository.FollowRepositoryImpl
 import com.ufc.quixada.bookworms.data.repository.OpenLibraryRepositoryImpl
 import com.ufc.quixada.bookworms.data.repository.UserRepositoryImpl
+import com.ufc.quixada.bookworms.data.repository.ShelfRepositoryImpl
 import com.ufc.quixada.bookworms.domain.repository.AuthRepository
 import com.ufc.quixada.bookworms.domain.repository.BookRepository
 import com.ufc.quixada.bookworms.domain.repository.FavoriteRepository
+import com.ufc.quixada.bookworms.domain.repository.FollowRepository
 import com.ufc.quixada.bookworms.domain.repository.OpenLibraryRepository
 import com.ufc.quixada.bookworms.domain.repository.UserRepository
+import com.ufc.quixada.bookworms.domain.repository.ShelfRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -82,6 +86,22 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideFollowRepository(
+        firestore: FirebaseFirestore
+    ): FollowRepository {
+        return FollowRepositoryImpl(firestore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideShelfRepository(
+        firestore: FirebaseFirestore
+    ): ShelfRepository {
+        return ShelfRepositoryImpl(firestore)
+    }
+
+    @Provides
+    @Singleton
     fun provideOpenLibraryRepository(
         client: HttpClient
     ): OpenLibraryRepository {
@@ -92,11 +112,11 @@ object AppModule {
     @Singleton
     fun provideHttpClient(): HttpClient {
         return HttpClient(CIO) {
-            install(Logging) { //logging plugin
+            install(Logging) {
                 level = LogLevel.ALL
             }
 
-            install(ContentNegotiation) { // JSON serialization/deserialization
+            install(ContentNegotiation) {
                 json(Json {
                     prettyPrint = true
                     isLenient = true
