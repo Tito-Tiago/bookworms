@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ufc.quixada.bookworms.domain.model.User
+import com.ufc.quixada.bookworms.domain.repository.FollowRepository
 import com.ufc.quixada.bookworms.domain.repository.FollowResult
 import com.ufc.quixada.bookworms.domain.usecase.GetPublicUserProfileUseCase
 import com.ufc.quixada.bookworms.domain.usecase.ToggleFollowUserUseCase
@@ -19,6 +20,7 @@ data class PublicProfileUiState(
     val isLoading: Boolean = true,
     val user: User? = null,
     val isFollowing: Boolean = false,
+    val isOwnProfile: Boolean = false,
     val followersCount: Int = 0,
     val followingCount: Int = 0,
     val errorMessage: String? = null
@@ -26,9 +28,10 @@ data class PublicProfileUiState(
 
 @HiltViewModel
 class PublicProfileViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle, // Para pegar o ID da navegação
+    savedStateHandle: SavedStateHandle,
     private val getPublicUserProfileUseCase: GetPublicUserProfileUseCase,
-    private val toggleFollowUserUseCase: ToggleFollowUserUseCase
+    private val toggleFollowUserUseCase: ToggleFollowUserUseCase,
+    private val followRepository: FollowRepository
 ) : ViewModel() {
 
     private val userId: String = checkNotNull(savedStateHandle["userId"])
@@ -51,8 +54,7 @@ class PublicProfileViewModel @Inject constructor(
                             isLoading = false,
                             user = data.user,
                             isFollowing = data.isFollowing,
-                            followersCount = data.followersCount,
-                            followingCount = data.followingCount
+                            isOwnProfile = data.isOwnProfile
                         )
                     }
                 },
@@ -60,32 +62,37 @@ class PublicProfileViewModel @Inject constructor(
                     _uiState.update { it.copy(isLoading = false, errorMessage = error.message) }
                 }
             )
+
+            launch {
+                followRepository.getFollowersCountFlow(userId).collect { count ->
+                    _uiState.update { it.copy(followersCount = count) }
+                }
+            }
+
+            launch {
+                followRepository.getFollowingCountFlow(userId).collect { count ->
+                    _uiState.update { it.copy(followingCount = count) }
+                }
+            }
         }
     }
 
     fun onToggleFollowClick() {
+        if (_uiState.value.isOwnProfile) return
+
         viewModelScope.launch {
             val currentFollowing = _uiState.value.isFollowing
 
-            // Otimista: atualiza a UI antes da resposta do servidor
-            _uiState.update {
-                it.copy(
-                    isFollowing = !currentFollowing,
-                    followersCount = if (currentFollowing) it.followersCount - 1 else it.followersCount + 1
-                )
-            }
+            _uiState.update { it.copy(isFollowing = !currentFollowing) }
 
-            when (val result = toggleFollowUserUseCase(userId, currentFollowing)) {
-                is FollowResult.Success -> { /* Sucesso, estado já atualizado */ }
-                is FollowResult.Error -> {
-                    // Reverte em caso de erro
-                    _uiState.update {
-                        it.copy(
-                            isFollowing = currentFollowing,
-                            followersCount = if (currentFollowing) it.followersCount + 1 else it.followersCount - 1,
-                            errorMessage = result.message
-                        )
-                    }
+            val result = toggleFollowUserUseCase(userId, currentFollowing)
+
+            if (result is FollowResult.Error) {
+                _uiState.update {
+                    it.copy(
+                        isFollowing = currentFollowing,
+                        errorMessage = result.message
+                    )
                 }
             }
         }

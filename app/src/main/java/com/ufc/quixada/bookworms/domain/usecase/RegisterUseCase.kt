@@ -8,7 +8,6 @@ class RegisterUseCase @Inject constructor(
     private val authRepository: AuthRepository
 ) {
     suspend operator fun invoke(nome: String, email: String, password: String): AuthResult {
-        // Validações básicas
         if (nome.isBlank()) {
             return AuthResult.Error("Nome não pode estar vazio")
         }

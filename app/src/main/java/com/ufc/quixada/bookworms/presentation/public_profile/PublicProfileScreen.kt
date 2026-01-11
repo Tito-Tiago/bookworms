@@ -1,16 +1,36 @@
 package com.ufc.quixada.bookworms.presentation.public_profile
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.PersonRemove
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -18,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
@@ -26,6 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @Composable
 fun PublicProfileScreen(
     onNavigateBack: () -> Unit,
+    onEditClick: () -> Unit,
     viewModel: PublicProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -57,7 +77,7 @@ fun PublicProfileScreen(
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Avatar
+                    // Avatar do Usuário
                     Box(
                         modifier = Modifier
                             .size(120.dp)
@@ -75,13 +95,14 @@ fun PublicProfileScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Nome e Turma
+                    // Nome do Usuário
                     Text(
                         text = uiState.user!!.nome,
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold
                     )
 
+                    // Turma do Usuário
                     uiState.user!!.turma?.let {
                         Text(
                             text = it,
@@ -92,7 +113,7 @@ fun PublicProfileScreen(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Estatísticas (Seguidores/Seguindo)
+                    // Estatísticas
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
@@ -103,23 +124,40 @@ fun PublicProfileScreen(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Botão Seguir/Deixar de Seguir (HU-10)
-                    Button(
-                        onClick = { viewModel.onToggleFollowClick() },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (uiState.isFollowing)
-                                MaterialTheme.colorScheme.secondary
-                            else
-                                MaterialTheme.colorScheme.primary
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Icon(
-                            imageVector = if (uiState.isFollowing) Icons.Default.PersonRemove else Icons.Default.PersonAdd,
-                            contentDescription = null
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(if (uiState.isFollowing) "Deixar de Seguir" else "Seguir")
+                    // Botões de Ação
+                    if (uiState.isOwnProfile) {
+                        // --- BOTÃO EDITAR PERFIL CORRIGIDO ---
+                        Button(
+                            onClick = onEditClick,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.tertiary,
+                                contentColor = MaterialTheme.colorScheme.onTertiary
+                            )
+                        ) {
+                            Icon(Icons.Default.Edit, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = "Editar Perfil") // Texto adicionado explicitamente
+                        }
+                        // -------------------------------------
+                    } else {
+                        Button(
+                            onClick = { viewModel.onToggleFollowClick() },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (uiState.isFollowing)
+                                    MaterialTheme.colorScheme.secondary
+                                else
+                                    MaterialTheme.colorScheme.primary
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                imageVector = if (uiState.isFollowing) Icons.Default.PersonRemove else Icons.Default.PersonAdd,
+                                contentDescription = null
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(if (uiState.isFollowing) "Deixar de Seguir" else "Seguir")
+                        }
                     }
 
                     if (uiState.errorMessage != null) {
@@ -132,20 +170,37 @@ fun PublicProfileScreen(
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    // Aqui você adicionaria a visualização das estantes (HU-11 - Estante Virtual)
-                    // Requereria um componente "BookshelfList" similar ao que você deve ter no "Meu Perfil"
                     Text(
                         text = "Estante Virtual",
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier.align(Alignment.Start)
                     )
-                    // TODO: Implementar lista de livros do usuário
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(100.dp)
+                            .background(
+                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                shape = MaterialTheme.shapes.medium
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Nenhum livro na estante ainda.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             } else {
-                Text(
-                    text = "Usuário não encontrado.",
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Usuário não encontrado.")
+                }
             }
         }
     }

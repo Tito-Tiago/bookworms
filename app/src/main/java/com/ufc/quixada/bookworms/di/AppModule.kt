@@ -82,7 +82,6 @@ object AppModule {
         return FavoriteRepositoryImpl(firestore)
     }
 
-    // --- ADICIONE ESTA FUNÇÃO ---
     @Provides
     @Singleton
     fun provideFollowRepository(
@@ -90,7 +89,6 @@ object AppModule {
     ): FollowRepository {
         return FollowRepositoryImpl(firestore)
     }
-    // -----------------------------
 
     @Provides
     @Singleton
