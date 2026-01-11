@@ -11,28 +11,14 @@ data class OpenLibrarySearchResponse(
 
 @Serializable
 data class OpenLibraryDocDto(
-    val key: String,
-    val title: String,
+    val key: String? = null,
+    val title: String? = null,
     @SerialName("author_name")
     val authorName: List<String>? = null,
     @SerialName("cover_i")
     val coverId: Int? = null,
-    val editions: OpenLibraryEditionsDto? = null
-)
-
-@Serializable
-data class OpenLibraryEditionsDto(
-    val docs: List<OpenLibraryEditionDocDto> = emptyList()
-)
-
-@Serializable
-data class OpenLibraryEditionDocDto(
-    val key: String,
-    val title: String,
-    val language: List<String>? = null,
-    @SerialName("cover_i")
-    val coverId: Int? = null,
-    val isbn: List<String>? = null
+    val isbn: List<String>? = null,
+    val language: List<String>? = null
 )
 
 @Serializable
@@ -48,14 +34,9 @@ data class RatingSummary(
 
 @Serializable
 data class OpenLibraryBookDetailsDto(
-    val description: JsonElement? = null, // Pode ser String ou Objeto
+    val description: JsonElement? = null,
     @SerialName("isbn_13")
     val isbn13: List<String>? = null,
     @SerialName("isbn_10")
     val isbn10: List<String>? = null
-)
-
-@Serializable
-data class DescriptionDto(
-    val value: String? = null
 )

@@ -1,6 +1,7 @@
 package com.ufc.quixada.bookworms.domain.repository
 
 import com.ufc.quixada.bookworms.domain.model.Follow
+import kotlinx.coroutines.flow.Flow
 
 sealed class FollowResult {
     object Success : FollowResult()
@@ -13,4 +14,7 @@ interface FollowRepository {
     suspend fun isFollowing(currentUserId: String, targetUserId: String): Boolean
     suspend fun getFollowersCount(userId: String): Int
     suspend fun getFollowingCount(userId: String): Int
+
+    fun getFollowersCountFlow(userId: String): Flow<Int>
+    fun getFollowingCountFlow(userId: String): Flow<Int>
 }

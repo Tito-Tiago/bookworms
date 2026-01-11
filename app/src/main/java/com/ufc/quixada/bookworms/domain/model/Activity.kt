@@ -4,12 +4,12 @@ import java.util.Date
 
 data class Activity(
     val activityId: String = "",
-    val userIdDono: String = "", // Usuário dono do feed
-    val userIdOrigem: String = "", // Usuário que gerou a atividade
-    val idReferencia: String = "", // ID da entidade referenciada (Review, ShelfItem, Favorite)
+    val userIdDono: String = "",
+    val userIdOrigem: String = "",
+    val idReferencia: String = "",
     val tipoReferencia: ActivityReferenceType = ActivityReferenceType.REVIEW,
-    val bookId: String? = null, // Para facilitar queries
-    val tipoAtividade: String = "", // Ex: "avaliou", "adicionou à estante", "favoritou"
+    val bookId: String? = null,
+    val tipoAtividade: String = "",
     val descricao: String = "",
     val dataAtividade: Date = Date()
 )

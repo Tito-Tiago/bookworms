@@ -18,53 +18,34 @@ class OpenLibraryRepositoryImpl @Inject constructor(
     private val client: HttpClient
 ): OpenLibraryRepository {
     private val apiBase = "https://openlibrary.org/search.json"
-    private val detailsBase = "https://openlibrary.org" // /books/ ou /works/
+    private val detailsBase = "https://openlibrary.org"
 
     override suspend fun searchBooks(query: String): BookResult {
         return try {
             val response: OpenLibrarySearchResponse = client.get(apiBase) {
                 parameter("q", query)
-                parameter("fields", "key,title,author_name,cover_i,editions,editions.title,editions.language,editions.cover_i,editions.key,editions.isbn")
-                parameter("limit", 12)
+                parameter("limit", 20)
             }.body()
 
             val books = response.docs.mapNotNull { doc ->
-                val ptEditions = doc.editions?.docs?.filter {
-                    it.language?.any { lang -> lang.contains("por", ignoreCase = true) } == true
-                } ?: emptyList()
-
-                val finalTitle: String
-                val finalCoverId: Int?
-                val finalKey: String
-                val finalIsbn: String?
-
-                if (ptEditions.isNotEmpty()) {
-                    val bestEdition = ptEditions.maxByOrNull { it.coverId != null } ?: ptEditions.first()
-                    finalTitle = bestEdition.title
-                    finalCoverId = bestEdition.coverId
-                    finalKey = bestEdition.key
-                    finalIsbn = bestEdition.isbn?.firstOrNull()
-                } else {
-                    finalTitle = doc.title
-                    finalCoverId = doc.coverId
-                    finalKey = doc.key
-                    val bestAnyEdition = doc.editions?.docs?.maxByOrNull { it.coverId != null }
-                    finalIsbn = bestAnyEdition?.isbn?.firstOrNull()
-                }
+                if (doc.key == null || doc.title == null) return@mapNotNull null
 
                 Book(
-                    bookId = finalKey.substringAfterLast("/"),
-                    titulo = finalTitle,
+                    bookId = doc.key.substringAfterLast("/"),
+                    titulo = doc.title,
                     autor = doc.authorName?.joinToString(", ") ?: "Autor Desconhecido",
-                    capaUrl = getCoverUrl(finalCoverId),
+                    capaUrl = getCoverUrl(doc.coverId),
                     fonteApi = "OpenLibrary",
-                    isbn = finalIsbn
+                    isbn = doc.isbn?.firstOrNull(),
+                    numAvaliacoes = 0,
+                    sinopse = ""
                 )
             }
+
             BookResult.Success(books)
         } catch (e: Exception) {
             e.printStackTrace()
-            BookResult.Error(e.message ?: "Erro interno")
+            BookResult.Error("Erro ao buscar livros: ${e.message}")
         }
     }
 
@@ -73,14 +54,12 @@ class OpenLibraryRepositoryImpl @Inject constructor(
             val isWork = bookId.endsWith("W")
             val endpoint = if (isWork) "works" else "books"
 
-            //busca avaliações
             val ratingsDeferred = async {
                 try {
                     client.get("$detailsBase/works/$bookId/ratings.json").body<OpenLibraryRatingResponse>()
                 } catch (e: Exception) { null }
             }
 
-            //busca detalhes
             val detailsDeferred = async {
                 try {
                     client.get("$detailsBase/$endpoint/$bookId.json").body<OpenLibraryBookDetailsDto>()
@@ -90,20 +69,19 @@ class OpenLibraryRepositoryImpl @Inject constructor(
             val ratings = ratingsDeferred.await()
             val details = detailsDeferred.await()
 
-            //parse da descrição
             val descriptionText = details?.description?.let { jsonElement ->
                 if (jsonElement is kotlinx.serialization.json.JsonObject) {
-                    jsonElement["value"]?.toString()?.removeSurrounding("\"")
+                    jsonElement["value"]?.toString()?.removeSurrounding("\"")?.replace("\\n", "\n")
                 } else {
-                    jsonElement.toString().removeSurrounding("\"")
+                    jsonElement.toString().removeSurrounding("\"").replace("\\n", "\n")
                 }
-            } ?: ""
+            } ?: "Sem sinopse disponível."
 
             val book = Book(
                 bookId = bookId,
                 sinopse = descriptionText,
                 notaApiExterna = ratings?.summary?.average ?: 0f,
-                isbn = details?.isbn13?.joinToString(", ") ?: details?.isbn10?.joinToString(", ")
+                isbn = details?.isbn13?.firstOrNull() ?: details?.isbn10?.firstOrNull()
             )
             Result.success(book)
         } catch (e: Exception) {
@@ -114,5 +92,4 @@ class OpenLibraryRepositoryImpl @Inject constructor(
     private fun getCoverUrl(coverId: Int?): String? {
         return coverId?.let { "https://covers.openlibrary.org/b/id/$it-L.jpg" }
     }
-
 }
