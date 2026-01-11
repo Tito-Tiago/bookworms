@@ -361,13 +361,6 @@ fun BookDetailsScreen(
                                         iconContentDescription = "Icone de teclado",
                                         modifier = Modifier.padding(bottom = 4.dp)
                                     )
-
-                                    BookwormsButton(
-                                        text = "Adicionar a estante",
-                                        onClick = { },
-                                        icon = painterResource(ic_estante),
-                                        iconContentDescription = "Icone de estante",
-                                    )
                                 }
                             }
 
