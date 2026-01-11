@@ -5,11 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ufc.quixada.bookworms.domain.model.ShelfType
 import com.ufc.quixada.bookworms.domain.repository.FavoriteResult
+import com.ufc.quixada.bookworms.domain.repository.ReviewResult
 import com.ufc.quixada.bookworms.domain.repository.SingleBookResult
 import com.ufc.quixada.bookworms.domain.repository.SingleReviewResult
 import com.ufc.quixada.bookworms.domain.usecase.book.GetBookDetailsUseCase
 import com.ufc.quixada.bookworms.domain.usecase.favorite.ManageFavoriteUseCase
 import com.ufc.quixada.bookworms.domain.usecase.review.AddReviewUseCase
+import com.ufc.quixada.bookworms.domain.usecase.review.GetBookReviewsUseCase
 import com.ufc.quixada.bookworms.domain.usecase.shelf.ManageShelfUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +27,7 @@ class BookDetailsViewModel @Inject constructor(
     private val manageFavoriteUseCase: ManageFavoriteUseCase,
     private val manageShelfUseCase: ManageShelfUseCase,
     private val addReviewUseCase: AddReviewUseCase,
+    private val getBookReviewsUseCase: GetBookReviewsUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -34,7 +37,10 @@ class BookDetailsViewModel @Inject constructor(
     private val bookId: String? = savedStateHandle["bookId"]
 
     init {
-        bookId?.let { loadBook(it) }
+        bookId?.let {
+            loadBook(it)
+            loadReviews(it)
+        }
     }
 
     fun loadBook(id: String) {
@@ -60,6 +66,32 @@ class BookDetailsViewModel @Inject constructor(
             } else if (bookResult is SingleBookResult.Error) {
                 _uiState.update {
                     it.copy(isLoading = false, errorMessage = bookResult.message)
+                }
+            }
+        }
+    }
+
+    fun loadReviews(bookId: String) {
+        _uiState.update { it.copy(isLoading = true) }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            val reviewsResult = getBookReviewsUseCase(bookId = bookId)
+
+            if (reviewsResult is ReviewResult.Success) {
+                _uiState.update {
+                    it.copy(
+                        reviews = reviewsResult.data,
+                        isLoading = false
+                    )
+                }
+            } else if (reviewsResult is ReviewResult.Error) {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = reviewsResult.message
+                    )
                 }
             }
         }

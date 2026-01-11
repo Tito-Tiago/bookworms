@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -73,7 +75,8 @@ import coil.compose.AsyncImage
 import com.ufc.quixada.bookworms.R.drawable.ic_teclado
 import com.ufc.quixada.bookworms.domain.model.ShelfType
 import com.ufc.quixada.bookworms.presentation.components.BookwormsButton
-import com.ufc.quixada.bookworms.presentation.components.RatingStarsInput
+import com.ufc.quixada.bookworms.presentation.components.RatingStars
+import com.ufc.quixada.bookworms.presentation.components.ReviewCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -310,11 +313,12 @@ fun BookDetailsScreen(
                                         modifier = Modifier.fillMaxWidth()
                                     )
 
-                                    RatingStarsInput(
+                                    RatingStars(
                                         rating = uiState.nota,
                                         onRatingChanged = { newRating ->
                                             viewModel.onRatingChanged(newRating)
-                                        }
+                                        },
+                                        horizontalArrangement = Arrangement.Center
                                     )
 
                                     OutlinedTextField(
@@ -360,7 +364,30 @@ fun BookDetailsScreen(
 
                             Spacer(modifier = Modifier.height(32.dp))
                             HorizontalDivider()
-                            Spacer(modifier = Modifier.height(80.dp))
+                            Spacer(modifier = Modifier.height(32.dp))
+
+                            if (uiState.reviews.isEmpty()) {
+                                Text(text = "Nenhuma resenha até agora, seja o primeiro a comentar!", color = Color.Gray)
+                            } else {
+                                Column {
+                                    uiState.reviews.forEach { review ->
+                                        uiState.book?.titulo?.let {
+                                            ReviewCard(
+                                                userName = review.userName,
+                                                bookName = it,
+                                                nota = review.nota,
+                                                textoResenha = review.textoResenha,
+                                                onTreeDotsClick = { },
+                                                contemSpoiler = review.contemSpoiler
+                                            )
+                                            Spacer(modifier = Modifier.height(24.dp))
+                                        }
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(32.dp))
+                            HorizontalDivider()
                         }
                     }
                 }
@@ -368,6 +395,7 @@ fun BookDetailsScreen(
         }
     }
 
+    // modal adcionar a estante
     if (showShelfModal) {
         ModalBottomSheet(
             onDismissRequest = { showShelfModal = false },

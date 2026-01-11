@@ -34,6 +34,7 @@ class UpdateReviewUseCase @Inject constructor(
             userId = oldReview.userId,
             bookId = oldReview.bookId,
             nota = nota,
+            userName = oldReview.userName,
             textoResenha = textoResenha,
             contemSpoiler = contemSpoiler,
             dataAtualizacao = Date()

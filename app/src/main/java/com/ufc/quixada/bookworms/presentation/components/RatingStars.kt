@@ -9,10 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -20,13 +18,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun RatingStarsInput(
+fun RatingStars(
     rating: Int,
-    onRatingChanged: (Int) -> Unit
+    onRatingChanged: (Int) -> Unit,
+    horizontalArrangement: Arrangement.Horizontal = Arrangement.Start,
 ) {
     Row(
-        horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = horizontalArrangement,
         modifier = Modifier.fillMaxWidth()
     ) {
         for (i in 1..5) {
@@ -35,7 +34,6 @@ fun RatingStarsInput(
                 imageVector = if (isSelected) Icons.Filled.Star else Icons.Outlined.StarOutline,
                 contentDescription = "Nota $i de 5 estrelas",
                 modifier = Modifier
-                    .size(30.dp)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
