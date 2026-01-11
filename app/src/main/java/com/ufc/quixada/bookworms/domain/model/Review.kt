@@ -7,6 +7,7 @@ data class Review(
     val userId: String = "",
     val bookId: String = "",
     val nota: Int = 0, // 1 a 5
+    val userName: String = "",
     val textoResenha: String = "",
     val contemSpoiler: Boolean = false,
     val dataCriacao: Date = Date(),

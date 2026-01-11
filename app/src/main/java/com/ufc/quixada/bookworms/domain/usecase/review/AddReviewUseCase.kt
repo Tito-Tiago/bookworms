@@ -42,6 +42,7 @@ class AddReviewUseCase @Inject constructor(
             userId = currentUser.uid,
             bookId = bookId,
             nota = nota,
+            userName = currentUser.nome,
             textoResenha = textoResenha,
             contemSpoiler = contemSpoiler
         )
