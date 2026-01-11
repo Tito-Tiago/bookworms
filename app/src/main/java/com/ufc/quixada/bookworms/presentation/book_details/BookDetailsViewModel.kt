@@ -84,11 +84,20 @@ class BookDetailsViewModel @Inject constructor(
     fun onShelfSelected(shelfType: ShelfType) {
         val currentId = bookId ?: return
         viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
             val result = manageShelfUseCase(currentId, shelfType)
-            if (result.isSuccess) {
-                _uiState.update { it.copy(shelfType = shelfType) }
-            } else {
-                _uiState.update { it.copy(errorMessage = "Erro ao atualizar estante") }
+
+            result.onSuccess {
+                _uiState.update { it.copy(shelfType = shelfType, isLoading = false, errorMessage = null) }
+            }.onFailure { exception ->
+                android.util.Log.e("ShelfError", "Falha ao salvar na estante", exception)
+
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Erro: ${exception.localizedMessage}"
+                    )
+                }
             }
         }
     }
