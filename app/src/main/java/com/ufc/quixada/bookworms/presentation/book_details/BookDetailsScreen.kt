@@ -48,9 +48,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldColors
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -68,16 +65,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.ufc.quixada.bookworms.domain.model.ShelfType
-import com.ufc.quixada.bookworms.R
-import com.ufc.quixada.bookworms.R.drawable.ic_estante
 import com.ufc.quixada.bookworms.R.drawable.ic_teclado
+import com.ufc.quixada.bookworms.domain.model.ShelfType
 import com.ufc.quixada.bookworms.presentation.components.BookwormsButton
 import com.ufc.quixada.bookworms.presentation.components.RatingStarsInput
 

@@ -6,10 +6,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,13 +27,15 @@ fun BookwormsButton(
     containerColor: Color? = null,
     contentColor: Color? = null
 ) {
+    val defaultColors = ButtonDefaults.buttonColors()
+
     Button(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = containerColor ?: ButtonDefaults.buttonColors().containerColor,
-            contentColor = contentColor ?: ButtonDefaults.buttonColors().contentColor
+            containerColor = containerColor ?: defaultColors.containerColor,
+            contentColor = contentColor ?: defaultColors.contentColor
         )
     ) {
         Row(

@@ -69,7 +69,7 @@ class ReviewRepositoryImpl @Inject constructor(
                 val oldReviewNota: Double = oldReviewSnapshot.getDouble("nota") ?: 0.0
                 val currentCount = bookSnapshot.getLong("numAvaliacoes") ?: 0
                 val currentAvg = bookSnapshot.getDouble("notaMediaComunidade") ?: 0.0
-                val newAvg = ((currentCount * currentAvg) + review.nota - oldReviewNota) / currentCount
+                val newAvg = if (currentCount > 0) ((currentCount * currentAvg) + review.nota - oldReviewNota) / currentCount else 0.0
 
                 transaction.set(oldReviewRef, review)
                 transaction.update(bookRef, mapOf(

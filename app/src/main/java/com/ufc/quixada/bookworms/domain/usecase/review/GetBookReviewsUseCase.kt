@@ -10,7 +10,7 @@ class GetBookReviewsUseCase @Inject constructor(
     private val reviewRepository: ReviewRepository,
     private val bookRepository: BookRepository
 ) {
-    suspend fun invoke(bookId: String): ReviewResult {
+    suspend operator fun invoke(bookId: String): ReviewResult {
         val bookResult = bookRepository.getBook(bookId)
 
         if (bookResult is SingleBookResult.Error){

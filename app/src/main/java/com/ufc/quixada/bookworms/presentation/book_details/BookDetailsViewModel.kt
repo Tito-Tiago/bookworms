@@ -6,11 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.ufc.quixada.bookworms.domain.model.ShelfType
 import com.ufc.quixada.bookworms.domain.repository.FavoriteResult
 import com.ufc.quixada.bookworms.domain.repository.SingleBookResult
+import com.ufc.quixada.bookworms.domain.repository.SingleReviewResult
 import com.ufc.quixada.bookworms.domain.usecase.book.GetBookDetailsUseCase
 import com.ufc.quixada.bookworms.domain.usecase.favorite.ManageFavoriteUseCase
-import com.ufc.quixada.bookworms.domain.usecase.shelf.ManageShelfUseCase
-import com.ufc.quixada.bookworms.domain.repository.SingleReviewResult
 import com.ufc.quixada.bookworms.domain.usecase.review.AddReviewUseCase
+import com.ufc.quixada.bookworms.domain.usecase.shelf.ManageShelfUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -127,7 +127,17 @@ class BookDetailsViewModel @Inject constructor(
     }
 
     fun onFazerResenhaClick() {
-        val bookId = bookId ?: return
+        val bookId = bookId ?: return //talves era massa colocar um erro
+        val currentRating = uiState.value.nota
+
+        if (currentRating < 1) {
+            _uiState.update {
+                it.copy(
+                    errorMessage = "Selecione uma nota entre 1 e 5 antes de enviar a resenha"
+                )
+            }
+            return
+        }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }

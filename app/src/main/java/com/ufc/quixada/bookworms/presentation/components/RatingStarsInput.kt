@@ -33,7 +33,7 @@ fun RatingStarsInput(
             val isSelected = i <= rating
             Icon(
                 imageVector = if (isSelected) Icons.Filled.Star else Icons.Outlined.StarOutline,
-                contentDescription = null,
+                contentDescription = "Nota $i de 5 estrelas",
                 modifier = Modifier
                     .size(30.dp)
                     .clickable(
