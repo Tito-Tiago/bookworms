@@ -1,8 +1,11 @@
-package com.ufc.quixada.bookworms.domain.usecase
+package com.ufc.quixada.bookworms.domain.usecase.user
 
+import com.ufc.quixada.bookworms.domain.model.User
 import com.ufc.quixada.bookworms.domain.repository.AuthRepository
 import com.ufc.quixada.bookworms.domain.repository.FollowRepository
 import com.ufc.quixada.bookworms.domain.repository.FollowResult
+import com.ufc.quixada.bookworms.domain.repository.UserRepository
+import com.ufc.quixada.bookworms.domain.repository.UserResult
 import javax.inject.Inject
 
 class ToggleFollowUserUseCase @Inject constructor(
@@ -23,12 +26,12 @@ class ToggleFollowUserUseCase @Inject constructor(
 }
 
 class GetPublicUserProfileUseCase @Inject constructor(
-    private val userRepository: com.ufc.quixada.bookworms.domain.repository.UserRepository,
+    private val userRepository: UserRepository,
     private val followRepository: FollowRepository,
     private val authRepository: AuthRepository
 ) {
     data class PublicProfileData(
-        val user: com.ufc.quixada.bookworms.domain.model.User,
+        val user: User,
         val isFollowing: Boolean,
         val followersCount: Int,
         val followingCount: Int
@@ -39,7 +42,7 @@ class GetPublicUserProfileUseCase @Inject constructor(
 
         return try {
             val userResult = userRepository.getUser(targetUserId)
-            if (userResult is com.ufc.quixada.bookworms.domain.repository.UserResult.Success) {
+            if (userResult is UserResult.Success) {
                 val isFollowing = currentUser?.let {
                     followRepository.isFollowing(it.uid, targetUserId)
                 } ?: false

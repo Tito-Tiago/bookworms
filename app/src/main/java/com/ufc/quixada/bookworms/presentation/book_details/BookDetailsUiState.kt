@@ -8,5 +8,8 @@ data class BookDetailsUiState(
     val isFavorite: Boolean = false,
     val shelfType: ShelfType? = null,
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val textoResenha: String = "",
+    val contemSpoiler: Boolean = false,
+    val nota: Int = 0
 )

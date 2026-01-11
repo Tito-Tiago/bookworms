@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ufc.quixada.bookworms.domain.model.User
 import com.ufc.quixada.bookworms.domain.repository.FollowResult
-import com.ufc.quixada.bookworms.domain.usecase.GetPublicUserProfileUseCase
-import com.ufc.quixada.bookworms.domain.usecase.ToggleFollowUserUseCase
+import com.ufc.quixada.bookworms.domain.usecase.user.GetPublicUserProfileUseCase
+import com.ufc.quixada.bookworms.domain.usecase.user.ToggleFollowUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -34,6 +34,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -43,6 +44,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -60,6 +62,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -67,7 +70,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.ufc.quixada.bookworms.R.drawable.ic_teclado
 import com.ufc.quixada.bookworms.domain.model.ShelfType
+import com.ufc.quixada.bookworms.presentation.components.BookwormsButton
+import com.ufc.quixada.bookworms.presentation.components.RatingStarsInput
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -118,35 +124,57 @@ fun BookDetailsScreen(
                             .verticalScroll(scrollState),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxWidth()) {
+                        // --- Área do Cabeçalho e Capa ---
+                        Box(
+                            contentAlignment = Alignment.TopCenter,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            // Fundo Verde (Header)
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(220.dp)
                                     .background(MaterialTheme.colorScheme.primary)
                             )
-                            Box(modifier = Modifier.padding(top = 100.dp)) {
+
+                            // Capa do Livro
+                            Box(
+                                modifier = Modifier
+                                    .padding(top = 100.dp)
+                            ) {
+                                // Card da Capa
                                 Card(
                                     elevation = CardDefaults.cardElevation(12.dp),
                                     shape = RoundedCornerShape(16.dp),
-                                    modifier = Modifier.width(180.dp).height(270.dp)
+                                    modifier = Modifier
+                                        .width(180.dp)
+                                        .height(270.dp)
                                 ) {
                                     if (!book.capaUrl.isNullOrEmpty()) {
                                         AsyncImage(
                                             model = book.capaUrl,
-                                            contentDescription = null,
+                                            contentDescription = "Capa de ${book.titulo}",
                                             contentScale = ContentScale.Crop,
                                             modifier = Modifier.fillMaxSize()
                                         )
                                     } else {
                                         Box(
-                                            modifier = Modifier.fillMaxSize().background(Color.Gray),
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .background(Color.Gray),
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            Icon(Icons.Default.Book, null, modifier = Modifier.size(64.dp), tint = Color.White)
+                                            Icon(
+                                                imageVector = Icons.Default.Book,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(64.dp),
+                                                tint = Color.White
+                                            )
                                         }
                                     }
                                 }
+
+                                // Botão de Favorito
                                 IconButton(
                                     onClick = { viewModel.onFavoriteClick() },
                                     modifier = Modifier
@@ -159,8 +187,8 @@ fun BookDetailsScreen(
                                 ) {
                                     Icon(
                                         imageVector = if (uiState.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onPrimary,
+                                        contentDescription = if (uiState.isFavorite) "Desfavoritar" else "Favoritar",
+                                        tint = if (uiState.isFavorite) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f),
                                         modifier = Modifier.size(28.dp)
                                     )
                                 }
@@ -168,16 +196,33 @@ fun BookDetailsScreen(
                         }
 
                         Spacer(modifier = Modifier.height(32.dp))
+
+                        // --- Título e Autor ---
                         Text(
                             text = book.titulo,
-                            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 0.5.sp
+                            ),
                             textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier.padding(horizontal = 24.dp)
                         )
-                        Text(text = book.autor, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = book.autor,
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            textAlign = TextAlign.Center
+                        )
 
                         Spacer(modifier = Modifier.height(24.dp))
 
+                        // --- Nota / Avaliações ---
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -220,17 +265,99 @@ fun BookDetailsScreen(
                         }
 
                         Spacer(modifier = Modifier.height(32.dp))
-                        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
+
+                        // --- Sinopse e Detalhes ---
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp)
+                        ) {
                             if (book.sinopse.isNotEmpty()) {
-                                Text("Sobre o livro", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                                Text(
+                                    text = "Sobre o livro",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Text(
                                     text = book.sinopse,
                                     style = MaterialTheme.typography.bodyLarge,
                                     lineHeight = 28.sp,
+                                    textAlign = TextAlign.Start,
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                                 )
                             }
+
+                            Spacer(modifier = Modifier.height(32.dp))
+
+                            // --- card de criar avaliação ---
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                elevation = CardDefaults.cardElevation(
+                                    defaultElevation = 8.dp
+                                ),
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(16.dp)
+                                ) {
+                                    Text(
+                                        text = "Toque para dar uma nota",
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    RatingStarsInput(
+                                        rating = uiState.nota,
+                                        onRatingChanged = { newRating ->
+                                            viewModel.onRatingChanged(newRating)
+                                        }
+                                    )
+
+                                    OutlinedTextField(
+                                        value = uiState.textoResenha,
+                                        onValueChange = { newText ->
+                                            viewModel.onTextoResenhaChanged(newText)
+                                        },
+                                        shape = RoundedCornerShape(12.dp),
+                                        placeholder = {
+                                            Text("Escreva sua resenha", color = Color.Gray)
+                                        },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(128.dp)
+                                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                                    )
+
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(4.dp)
+                                    ) {
+                                        Checkbox(
+                                            checked = uiState.contemSpoiler,
+                                            onCheckedChange = {
+                                                viewModel.toggleContemSpoiler()
+                                            }
+                                        )
+                                        Text(
+                                            text = "Contém spoilers",
+                                            fontSize = 16.sp
+                                        )
+                                    }
+
+                                    BookwormsButton(
+                                        text = "Fazer resenha",
+                                        onClick = { viewModel.onFazerResenhaClick() },
+                                        icon = painterResource(ic_teclado),
+                                        iconContentDescription = "Icone de teclado",
+                                        modifier = Modifier.padding(bottom = 4.dp)
+                                    )
+                                }
+                            }
+
                             Spacer(modifier = Modifier.height(32.dp))
                             HorizontalDivider()
                             Spacer(modifier = Modifier.height(80.dp))

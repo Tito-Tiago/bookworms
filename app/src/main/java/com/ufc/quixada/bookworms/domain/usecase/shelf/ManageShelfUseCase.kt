@@ -1,4 +1,4 @@
-package com.ufc.quixada.bookworms.domain.usecase
+package com.ufc.quixada.bookworms.domain.usecase.shelf
 
 import com.ufc.quixada.bookworms.domain.model.ShelfType
 import com.ufc.quixada.bookworms.domain.repository.AuthRepository
