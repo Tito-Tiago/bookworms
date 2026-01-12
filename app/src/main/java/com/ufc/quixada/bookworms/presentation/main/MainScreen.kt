@@ -90,7 +90,8 @@ fun MainScreen(
                     },
                     onEditClick = {
                         navController.navigate("profile_edit")
-                    }
+                    },
+                    onBookClick = onBookClick // Pass onBookClick to navigate to book details from shelf
                 )
             }
 

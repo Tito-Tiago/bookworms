@@ -1,9 +1,11 @@
 package com.ufc.quixada.bookworms.presentation.public_profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,17 +14,23 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.PersonRemove
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -32,24 +40,48 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
+import com.ufc.quixada.bookworms.domain.model.Book
+import com.ufc.quixada.bookworms.domain.model.ShelfType
+import com.ufc.quixada.bookworms.domain.repository.ShelfWithBooks
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PublicProfileScreen(
     onNavigateBack: () -> Unit,
     onEditClick: () -> Unit,
+    onBookClick: (String) -> Unit = {},
     viewModel: PublicProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refreshShelves()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -126,7 +158,6 @@ fun PublicProfileScreen(
 
                     // Botões de Ação
                     if (uiState.isOwnProfile) {
-                        // --- BOTÃO EDITAR PERFIL CORRIGIDO ---
                         Button(
                             onClick = onEditClick,
                             modifier = Modifier.fillMaxWidth(),
@@ -137,9 +168,8 @@ fun PublicProfileScreen(
                         ) {
                             Icon(Icons.Default.Edit, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(text = "Editar Perfil") // Texto adicionado explicitamente
+                            Text(text = "Editar Perfil")
                         }
-                        // -------------------------------------
                     } else {
                         Button(
                             onClick = { viewModel.onToggleFollowClick() },
@@ -173,25 +203,50 @@ fun PublicProfileScreen(
                     Text(
                         text = "Estante Virtual",
                         style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
                         modifier = Modifier.align(Alignment.Start)
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(100.dp)
-                            .background(
-                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                shape = MaterialTheme.shapes.medium
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Nenhum livro na estante ainda.",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                    if (uiState.isLoadingShelves) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .align(Alignment.CenterHorizontally)
                         )
+                    } else if (uiState.shelves.isEmpty() || uiState.shelves.all { it.books.isEmpty() }) {
+                        // Empty state
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(100.dp)
+                                .background(
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                    shape = MaterialTheme.shapes.medium
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Nenhum livro na estante ainda.",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    } else {
+                        // Display shelves
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(24.dp)
+                        ) {
+                            uiState.shelves.forEach { shelfWithBooks ->
+                                if (shelfWithBooks.books.isNotEmpty()) {
+                                    ShelfSection(
+                                        shelfWithBooks = shelfWithBooks,
+                                        onBookClick = onBookClick
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             } else {
@@ -202,6 +257,105 @@ fun PublicProfileScreen(
                     Text("Usuário não encontrado.")
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun ShelfSection(
+    shelfWithBooks: ShelfWithBooks,
+    onBookClick: (String) -> Unit
+) {
+    val shelfName = when (shelfWithBooks.shelfType) {
+        ShelfType.LENDO -> "Lendo"
+        ShelfType.QUERO_LER -> "Quero Ler"
+        ShelfType.LIDO -> "Lidos"
+        ShelfType.CUSTOM -> "Outros"
+    }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = shelfName,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = "${shelfWithBooks.books.size} livro${if (shelfWithBooks.books.size != 1) "s" else ""}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(end = 8.dp)
+        ) {
+            items(shelfWithBooks.books) { book: Book ->
+                BookCard(
+                    book = book,
+                    onClick = { onBookClick(book.bookId) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun BookCard(
+    book: Book,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .width(100.dp)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column {
+            // Book cover
+            if (book.capaUrl != null) {
+                AsyncImage(
+                    model = book.capaUrl,
+                    contentDescription = book.titulo,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(140.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Book,
+                        contentDescription = null,
+                        modifier = Modifier.size(40.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            // Book title
+            Text(
+                text = book.titulo,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Medium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(8.dp)
+            )
         }
     }
 }

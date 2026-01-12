@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.ufc.quixada.bookworms.domain.model.User
 import com.ufc.quixada.bookworms.domain.repository.FollowRepository
 import com.ufc.quixada.bookworms.domain.repository.FollowResult
+import com.ufc.quixada.bookworms.domain.repository.ShelfRepository
+import com.ufc.quixada.bookworms.domain.repository.ShelfWithBooks
 import com.ufc.quixada.bookworms.domain.usecase.user.GetPublicUserProfileUseCase
 import com.ufc.quixada.bookworms.domain.usecase.user.ToggleFollowUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,6 +25,8 @@ data class PublicProfileUiState(
     val isOwnProfile: Boolean = false,
     val followersCount: Int = 0,
     val followingCount: Int = 0,
+    val shelves: List<ShelfWithBooks> = emptyList(),
+    val isLoadingShelves: Boolean = false,
     val errorMessage: String? = null
 )
 
@@ -31,7 +35,8 @@ class PublicProfileViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getPublicUserProfileUseCase: GetPublicUserProfileUseCase,
     private val toggleFollowUserUseCase: ToggleFollowUserUseCase,
-    private val followRepository: FollowRepository
+    private val followRepository: FollowRepository,
+    private val shelfRepository: ShelfRepository
 ) : ViewModel() {
 
     private val userId: String = checkNotNull(savedStateHandle["userId"])
@@ -74,7 +79,28 @@ class PublicProfileViewModel @Inject constructor(
                     _uiState.update { it.copy(followingCount = count) }
                 }
             }
+
+            loadUserShelves()
         }
+    }
+
+    private fun loadUserShelves() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingShelves = true) }
+
+            shelfRepository.getUserShelvesWithBooks(userId).fold(
+                onSuccess = { shelves ->
+                    _uiState.update { it.copy(isLoadingShelves = false, shelves = shelves) }
+                },
+                onFailure = { error ->
+                    _uiState.update { it.copy(isLoadingShelves = false) }
+                }
+            )
+        }
+    }
+
+    fun refreshShelves() {
+        loadUserShelves()
     }
 
     fun onToggleFollowClick() {
