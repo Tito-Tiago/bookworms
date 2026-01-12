@@ -14,17 +14,19 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -34,17 +36,23 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,15 +64,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.ufc.quixada.bookworms.R.drawable.ic_teclado
 import com.ufc.quixada.bookworms.domain.model.ShelfType
+import com.ufc.quixada.bookworms.presentation.components.BookwormsButton
+import com.ufc.quixada.bookworms.presentation.components.RatingStars
+import com.ufc.quixada.bookworms.presentation.components.ReviewCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,6 +87,7 @@ fun BookDetailsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
     var showShelfModal by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
 
     Scaffold(
         topBar = {
@@ -114,35 +127,57 @@ fun BookDetailsScreen(
                             .verticalScroll(scrollState),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Box(contentAlignment = Alignment.TopCenter, modifier = Modifier.fillMaxWidth()) {
+                        // --- Área do Cabeçalho e Capa ---
+                        Box(
+                            contentAlignment = Alignment.TopCenter,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            // Fundo Verde (Header)
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(220.dp)
                                     .background(MaterialTheme.colorScheme.primary)
                             )
-                            Box(modifier = Modifier.padding(top = 100.dp)) {
+
+                            // Capa do Livro
+                            Box(
+                                modifier = Modifier
+                                    .padding(top = 100.dp)
+                            ) {
+                                // Card da Capa
                                 Card(
                                     elevation = CardDefaults.cardElevation(12.dp),
                                     shape = RoundedCornerShape(16.dp),
-                                    modifier = Modifier.width(180.dp).height(270.dp)
+                                    modifier = Modifier
+                                        .width(180.dp)
+                                        .height(270.dp)
                                 ) {
                                     if (!book.capaUrl.isNullOrEmpty()) {
                                         AsyncImage(
                                             model = book.capaUrl,
-                                            contentDescription = null,
+                                            contentDescription = "Capa de ${book.titulo}",
                                             contentScale = ContentScale.Crop,
                                             modifier = Modifier.fillMaxSize()
                                         )
                                     } else {
                                         Box(
-                                            modifier = Modifier.fillMaxSize().background(Color.Gray),
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .background(Color.Gray),
                                             contentAlignment = Alignment.Center
                                         ) {
-                                            Icon(Icons.Default.Book, null, modifier = Modifier.size(64.dp), tint = Color.White)
+                                            Icon(
+                                                imageVector = Icons.Default.Book,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(64.dp),
+                                                tint = Color.White
+                                            )
                                         }
                                     }
                                 }
+
+                                // Botão de Favorito
                                 IconButton(
                                     onClick = { viewModel.onFavoriteClick() },
                                     modifier = Modifier
@@ -155,8 +190,8 @@ fun BookDetailsScreen(
                                 ) {
                                     Icon(
                                         imageVector = if (uiState.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onPrimary,
+                                        contentDescription = if (uiState.isFavorite) "Desfavoritar" else "Favoritar",
+                                        tint = if (uiState.isFavorite) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f),
                                         modifier = Modifier.size(28.dp)
                                     )
                                 }
@@ -164,16 +199,33 @@ fun BookDetailsScreen(
                         }
 
                         Spacer(modifier = Modifier.height(32.dp))
+
+                        // --- Título e Autor ---
                         Text(
                             text = book.titulo,
-                            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 0.5.sp
+                            ),
                             textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier.padding(horizontal = 24.dp)
                         )
-                        Text(text = book.autor, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = book.autor,
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            textAlign = TextAlign.Center
+                        )
 
                         Spacer(modifier = Modifier.height(24.dp))
 
+                        // --- Nota / Avaliações ---
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -193,8 +245,7 @@ fun BookDetailsScreen(
                                 onClick = { showShelfModal = true },
                                 shape = RoundedCornerShape(24.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (uiState.shelfType != null) Color(0xFF2E7D32) else MaterialTheme.colorScheme.primary,
-                                    contentColor = Color.White
+                                    containerColor = if (uiState.shelfType != null) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
                                 )
                             ) {
                                 Icon(
@@ -217,18 +268,126 @@ fun BookDetailsScreen(
                         }
 
                         Spacer(modifier = Modifier.height(32.dp))
-                        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
+
+                        // --- Sinopse e Detalhes ---
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp)
+                        ) {
                             if (book.sinopse.isNotEmpty()) {
-                                Text("Sobre o livro", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                                Text(
+                                    text = "Sobre o livro",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Text(
                                     text = book.sinopse,
                                     style = MaterialTheme.typography.bodyLarge,
                                     lineHeight = 28.sp,
+                                    textAlign = TextAlign.Start,
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                                 )
                             }
-                            Spacer(modifier = Modifier.height(80.dp))
+
+                            Spacer(modifier = Modifier.height(32.dp))
+
+                            // --- card de criar avaliação ---
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                elevation = CardDefaults.cardElevation(
+                                    defaultElevation = 8.dp
+                                ),
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(16.dp)
+                                ) {
+                                    Text(
+                                        text = "Toque para dar uma nota",
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    RatingStars(
+                                        rating = uiState.nota,
+                                        onRatingChanged = { newRating ->
+                                            viewModel.onRatingChanged(newRating)
+                                        },
+                                        horizontalArrangement = Arrangement.Center
+                                    )
+
+                                    OutlinedTextField(
+                                        value = uiState.textoResenha,
+                                        onValueChange = { newText ->
+                                            viewModel.onTextoResenhaChanged(newText)
+                                        },
+                                        shape = RoundedCornerShape(12.dp),
+                                        placeholder = {
+                                            Text("Escreva sua resenha", color = Color.Gray)
+                                        },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(128.dp)
+                                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                                    )
+
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.padding(4.dp)
+                                    ) {
+                                        Checkbox(
+                                            checked = uiState.contemSpoiler,
+                                            onCheckedChange = {
+                                                viewModel.toggleContemSpoiler()
+                                            }
+                                        )
+                                        Text(
+                                            text = "Contém spoilers",
+                                            fontSize = 16.sp
+                                        )
+                                    }
+
+                                    BookwormsButton(
+                                        text = "Fazer resenha",
+                                        onClick = { viewModel.onFazerResenhaClick() },
+                                        icon = painterResource(ic_teclado),
+                                        iconContentDescription = "Icone de teclado",
+                                        modifier = Modifier.padding(bottom = 4.dp)
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(32.dp))
+                            HorizontalDivider()
+                            Spacer(modifier = Modifier.height(32.dp))
+
+                            if (uiState.reviews.isEmpty()) {
+                                Text(text = "Nenhuma resenha até agora, seja o primeiro a comentar!", color = Color.Gray)
+                            } else {
+                                Column {
+                                    uiState.reviews.forEach { review ->
+                                        uiState.book?.titulo?.let {
+                                            ReviewCard(
+                                                userName = review.userName,
+                                                bookName = it,
+                                                nota = review.nota,
+                                                textoResenha = review.textoResenha,
+                                                onTreeDotsClick = { },
+                                                contemSpoiler = review.contemSpoiler
+                                            )
+                                            Spacer(modifier = Modifier.height(24.dp))
+                                        }
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(32.dp))
+                            HorizontalDivider()
                         }
                     }
                 }
@@ -236,94 +395,65 @@ fun BookDetailsScreen(
         }
     }
 
+    // modal adcionar a estante
     if (showShelfModal) {
-        var temporarySelectedType by remember { mutableStateOf(uiState.shelfType) }
-
-        Dialog(onDismissRequest = { showShelfModal = false }) {
-            Surface(
-                shape = RoundedCornerShape(28.dp),
+        ModalBottomSheet(
+            onDismissRequest = { showShelfModal = false },
+            sheetState = sheetState
+        ) {
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                color = MaterialTheme.colorScheme.surface,
-                tonalElevation = 6.dp
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 32.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Adicionar à uma Estante",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                        IconButton(onClick = { showShelfModal = false }) {
-                            Icon(Icons.Default.Close, contentDescription = "Fechar")
-                        }
-                    }
+                Text(
+                    text = "Adicionar à estante",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp)
+                )
 
-                    Text(
-                        text = "Qual é o status de leitura?",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
+                val options = listOf(
+                    Triple(ShelfType.LIDO, "Lido", Icons.Default.Done),
+                    Triple(ShelfType.LENDO, "Lendo", Icons.Default.AutoStories),
+                    Triple(ShelfType.QUERO_LER, "Quero Ler", Icons.Default.Bookmark)
+                )
 
-                    val options = listOf(
-                        Triple(ShelfType.LENDO, "Lendo", Icons.Default.AutoStories),
-                        Triple(ShelfType.QUERO_LER, "Quero ler", Icons.Default.Bookmark),
-                        Triple(ShelfType.LIDO, "Lido", Icons.Default.Done)
-                    )
-
-                    options.forEach { (type, label, icon) ->
-                        val isSelected = temporarySelectedType == type
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .clickable { temporarySelectedType = type }
-                                .padding(vertical = 8.dp, horizontal = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                options.forEach { (type, label, icon) ->
+                    val isSelected = uiState.shelfType == type
+                    ListItem(
+                        headlineContent = { Text(label) },
+                        leadingContent = {
                             Icon(
                                 imageVector = icon,
                                 contentDescription = null,
-                                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(24.dp)
+                                tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = label,
-                                style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.weight(1f)
-                            )
-                            RadioButton(
-                                selected = isSelected,
-                                onClick = { temporarySelectedType = type }
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Button(
-                        onClick = {
-                            temporarySelectedType?.let { viewModel.onShelfSelected(it) }
-                            showShelfModal = false
                         },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(24.dp),
-                        enabled = temporarySelectedType != null,
-                        colors = ButtonDefaults.buttonColors(contentColor = Color.White)
-                    ) {
-                        Text("Confirmar", fontWeight = FontWeight.Bold)
-                    }
+                        trailingContent = if (isSelected) {
+                            { Icon(Icons.Default.Check, null, tint = MaterialTheme.colorScheme.primary) }
+                        } else null,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
+                            .clickable {
+                                viewModel.onShelfSelected(type)
+                                showShelfModal = false
+                            },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                    )
+                }
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+                TextButton(
+                    onClick = { /* Implementar HU-06 futuramente */ },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Adicionar uma nova estante")
                 }
             }
         }

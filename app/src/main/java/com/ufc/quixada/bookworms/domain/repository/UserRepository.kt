@@ -10,4 +10,6 @@ sealed class UserResult {
 interface UserRepository {
     suspend fun getUser(uid: String): UserResult
     suspend fun updateUser(user: User): UserResult
+
+    suspend fun searchUsers(query: String): List<User>
 }

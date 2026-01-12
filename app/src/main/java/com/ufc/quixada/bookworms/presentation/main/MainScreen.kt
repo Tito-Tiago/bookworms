@@ -12,6 +12,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -33,6 +34,7 @@ import com.ufc.quixada.bookworms.presentation.feed.FeedScreen
 import com.ufc.quixada.bookworms.presentation.home.HomeScreen
 import com.ufc.quixada.bookworms.presentation.navigation.BottomNavItem
 import com.ufc.quixada.bookworms.presentation.notification.NotificationScreen
+import com.ufc.quixada.bookworms.presentation.profile.ProfileScreen
 import com.ufc.quixada.bookworms.presentation.public_profile.PublicProfileScreen
 
 @Composable
@@ -41,8 +43,10 @@ fun MainScreen(
     onBookClick: (String) -> Unit
 ) {
     val navController = rememberNavController()
-    // Obtemos o ID do usuário atual para usar no link do perfil
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+    val navigateToUserProfile = { userId: String ->
+        navController.navigate("public_profile/$userId")
+    }
 
     Scaffold(
         bottomBar = {
@@ -62,27 +66,41 @@ fun MainScreen(
             composable(BottomNavItem.Feed.route) {
                 FeedScreen(onBookClick = onBookClick)
             }
+
             composable(BottomNavItem.Catalog.route) {
                 HomeScreen(
                     onBookClick = onBookClick,
+                    onUserClick = navigateToUserProfile
                 )
             }
+
             composable(BottomNavItem.Notifications.route) {
                 NotificationScreen()
             }
 
-            // Rota dinâmica para o Perfil Público
             composable(
                 route = "public_profile/{userId}",
                 arguments = listOf(navArgument("userId") { type = NavType.StringType })
             ) {
                 PublicProfileScreen(
                     onNavigateBack = {
-                        // Se estiver na aba principal, talvez não queira fazer nada ou voltar para o feed
                         if (navController.previousBackStackEntry != null) {
                             navController.popBackStack()
                         }
-                    }
+                    },
+                    onEditClick = {
+                        navController.navigate("profile_edit")
+                    },
+                    onBookClick = onBookClick // Pass onBookClick to navigate to book details from shelf
+                )
+            }
+
+            composable("profile_edit") {
+                ProfileScreen(
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    },
+                    onLogout = onLogout
                 )
             }
         }
@@ -119,12 +137,11 @@ fun BottomBar(
             tonalElevation = 8.dp
         ) {
             items.forEach { item ->
-                // Lógica especial para verificar se o item selecionado é o Perfil
-                val isProfile = item == BottomNavItem.Profile
-                val isProfileRoute = currentDestination?.route?.startsWith("public_profile") == true
+                val isProfileItem = item == BottomNavItem.Profile
 
-                val selected = if (isProfile) {
-                    isProfileRoute
+                val selected = if (isProfileItem) {
+                    currentDestination?.route?.startsWith("public_profile") == true ||
+                            currentDestination?.route == "profile_edit"
                 } else {
                     currentDestination?.hierarchy?.any { it.route == item.route } == true
                 }
@@ -138,8 +155,7 @@ fun BottomBar(
                     },
                     selected = selected,
                     onClick = {
-                        // Se clicar no Perfil, monta a rota com o ID do usuário logado
-                        val route = if (isProfile) {
+                        val route = if (isProfileItem) {
                             "public_profile/$currentUserId"
                         } else {
                             item.route

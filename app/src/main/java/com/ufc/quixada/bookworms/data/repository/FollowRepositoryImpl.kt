@@ -4,6 +4,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.ufc.quixada.bookworms.domain.model.Follow
 import com.ufc.quixada.bookworms.domain.repository.FollowRepository
 import com.ufc.quixada.bookworms.domain.repository.FollowResult
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -19,9 +22,7 @@ class FollowRepositoryImpl @Inject constructor(
                 userIdSeguidor = currentUserId,
                 userIdSeguido = targetUserId
             )
-            // Cria um ID único composto para evitar duplicatas facilmente ou deixe o Firestore gerar
             val docId = "${currentUserId}_${targetUserId}"
-
             collection.document(docId).set(follow).await()
             FollowResult.Success
         } catch (e: Exception) {
@@ -51,19 +52,41 @@ class FollowRepositoryImpl @Inject constructor(
 
     override suspend fun getFollowersCount(userId: String): Int {
         return try {
-            val query = collection.whereEqualTo("userIdSeguido", userId).get().await()
-            query.size()
-        } catch (e: Exception) {
-            0
-        }
+            collection.whereEqualTo("userIdSeguido", userId).get().await().size()
+        } catch (e: Exception) { 0 }
     }
 
     override suspend fun getFollowingCount(userId: String): Int {
         return try {
-            val query = collection.whereEqualTo("userIdSeguidor", userId).get().await()
-            query.size()
-        } catch (e: Exception) {
-            0
-        }
+            collection.whereEqualTo("userIdSeguidor", userId).get().await().size()
+        } catch (e: Exception) { 0 }
+    }
+
+    override fun getFollowersCountFlow(userId: String): Flow<Int> = callbackFlow {
+        val registration = collection.whereEqualTo("userIdSeguido", userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                if (snapshot != null) {
+                    trySend(snapshot.size())
+                }
+            }
+        awaitClose { registration.remove() }
+    }
+
+    override fun getFollowingCountFlow(userId: String): Flow<Int> = callbackFlow {
+        val registration = collection.whereEqualTo("userIdSeguidor", userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                if (snapshot != null) {
+                    trySend(snapshot.size())
+                }
+            }
+        awaitClose { registration.remove() }
     }
 }

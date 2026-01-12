@@ -4,7 +4,7 @@ import java.util.Date
 
 data class Follow(
     val followId: String = "",
-    val userIdSeguidor: String = "", // Quem segue
-    val userIdSeguido: String = "", // Quem é seguido
+    val userIdSeguidor: String = "",
+    val userIdSeguido: String = "",
     val dataInicio: Date = Date()
 )

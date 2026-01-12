@@ -1,4 +1,4 @@
-package com.ufc.quixada.bookworms.domain.usecase
+package com.ufc.quixada.bookworms.domain.usecase.auth
 
 import com.ufc.quixada.bookworms.domain.repository.AuthRepository
 import com.ufc.quixada.bookworms.domain.repository.AuthResult
@@ -8,7 +8,6 @@ class LoginUseCase @Inject constructor(
     private val authRepository: AuthRepository
 ) {
     suspend operator fun invoke(email: String, password: String): AuthResult {
-        // Validações básicas
         if (email.isBlank()) {
             return AuthResult.Error("E-mail não pode estar vazio")
         }
