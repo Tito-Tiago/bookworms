@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.ufc.quixada.bookworms.data.local.BookDatabase
 import com.ufc.quixada.bookworms.data.local.dao.BookDao
+import com.ufc.quixada.bookworms.data.repository.ActivityRepositoryImpl
 import com.ufc.quixada.bookworms.data.repository.AuthRepositoryImpl
 import com.ufc.quixada.bookworms.data.repository.BookRepositoryImpl
 import com.ufc.quixada.bookworms.data.repository.FavoriteRepositoryImpl
@@ -14,6 +15,7 @@ import com.ufc.quixada.bookworms.data.repository.OpenLibraryRepositoryImpl
 import com.ufc.quixada.bookworms.data.repository.ReviewRepositoryImpl
 import com.ufc.quixada.bookworms.data.repository.ShelfRepositoryImpl
 import com.ufc.quixada.bookworms.data.repository.UserRepositoryImpl
+import com.ufc.quixada.bookworms.domain.repository.ActivityRepository
 import com.ufc.quixada.bookworms.domain.repository.AuthRepository
 import com.ufc.quixada.bookworms.domain.repository.BookRepository
 import com.ufc.quixada.bookworms.domain.repository.FavoriteRepository
@@ -108,6 +110,15 @@ object AppModule {
         firestore: FirebaseFirestore
     ): ReviewRepository {
         return ReviewRepositoryImpl(firestore)
+    }
+
+    // NOVO PROVIDER PARA ATIVIDADES
+    @Provides
+    @Singleton
+    fun provideActivityRepository(
+        firestore: FirebaseFirestore
+    ): ActivityRepository {
+        return ActivityRepositoryImpl(firestore)
     }
 
     @Provides

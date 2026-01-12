@@ -100,6 +100,42 @@ class BookRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getTrendingBooks(): BookResult {
+        return try {
+            // Ordena por número de avaliações (mais populares)
+            val snapshot = firestore.collection("books")
+                .orderBy("numAvaliacoes", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .limit(10)
+                .get()
+                .await()
+
+            val books = snapshot.documents.mapNotNull { doc ->
+                doc.toObject(Book::class.java)?.copy(bookId = doc.id)
+            }
+            BookResult.Success(books)
+        } catch (e: Exception) {
+            BookResult.Error(e.message ?: "Erro ao buscar livros em alta")
+        }
+    }
+
+    override suspend fun getRecentBooks(): BookResult {
+        return try {
+            // Ordena por data de cadastro (novidades)
+            val snapshot = firestore.collection("books")
+                .orderBy("dataCadastro", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .limit(10)
+                .get()
+                .await()
+
+            val books = snapshot.documents.mapNotNull { doc ->
+                doc.toObject(Book::class.java)?.copy(bookId = doc.id)
+            }
+            BookResult.Success(books)
+        } catch (e: Exception) {
+            BookResult.Error(e.message ?: "Erro ao buscar novidades")
+        }
+    }
+
     private fun mapEntityToDomain(entity: BookEntity) = Book(
         bookId = entity.bookId,
         titulo = entity.titulo,
