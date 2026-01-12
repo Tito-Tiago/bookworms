@@ -10,7 +10,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 
@@ -18,34 +17,57 @@ class OpenLibraryRepositoryImpl @Inject constructor(
     private val client: HttpClient
 ): OpenLibraryRepository {
     private val apiBase = "https://openlibrary.org/search.json"
-    private val detailsBase = "https://openlibrary.org"
+    private val detailsBase = "https://openlibrary.org" // /books/ ou /works/
 
     override suspend fun searchBooks(query: String): BookResult {
         return try {
             val response: OpenLibrarySearchResponse = client.get(apiBase) {
                 parameter("q", query)
-                parameter("limit", 20)
+                parameter("fields", "key,title,author_name,cover_i,editions,editions.title,editions.language,editions.cover_i,editions.key,editions.isbn")
+                parameter("limit", 12)
             }.body()
 
             val books = response.docs.mapNotNull { doc ->
-                if (doc.key == null || doc.title == null) return@mapNotNull null
+                val ptEditions = doc.editions?.docs?.filter {
+                    it.language?.any { lang -> lang.contains("por", ignoreCase = true) } == true
+                } ?: emptyList()
+
+                val selectedEdition = if (ptEditions.isNotEmpty()) {
+                    ptEditions.maxByOrNull { it.coverId != null } ?: ptEditions.first()
+                } else {
+                    doc.editions?.docs?.maxByOrNull { it.coverId != null } ?: doc.editions?.docs?.firstOrNull()
+                }
+
+                val finalTitle: String
+                val finalCoverId: Int?
+                val finalKey: String
+                val finalIsbn: String?
+
+                if (selectedEdition != null) {
+                    finalTitle = selectedEdition.title
+                    finalCoverId = selectedEdition.coverId
+                    finalKey = selectedEdition.key
+                    finalIsbn = selectedEdition.isbn?.firstOrNull()
+                } else {
+                    finalTitle = doc.title
+                    finalCoverId = doc.coverId
+                    finalKey = doc.key
+                    finalIsbn = null
+                }
 
                 Book(
-                    bookId = doc.key.substringAfterLast("/"),
-                    titulo = doc.title,
+                    bookId = finalKey.substringAfterLast("/"),
+                    titulo = finalTitle,
                     autor = doc.authorName?.joinToString(", ") ?: "Autor Desconhecido",
-                    capaUrl = getCoverUrl(doc.coverId),
+                    capaUrl = getCoverUrl(finalCoverId),
                     fonteApi = "OpenLibrary",
-                    isbn = doc.isbn?.firstOrNull(),
-                    numAvaliacoes = 0,
-                    sinopse = ""
+                    isbn = finalIsbn
                 )
             }
-
             BookResult.Success(books)
         } catch (e: Exception) {
             e.printStackTrace()
-            BookResult.Error("Erro ao buscar livros: ${e.message}")
+            BookResult.Error(e.message ?: "Erro interno")
         }
     }
 
@@ -54,34 +76,38 @@ class OpenLibraryRepositoryImpl @Inject constructor(
             val isWork = bookId.endsWith("W")
             val endpoint = if (isWork) "works" else "books"
 
-            val ratingsDeferred = async {
-                try {
-                    client.get("$detailsBase/works/$bookId/ratings.json").body<OpenLibraryRatingResponse>()
-                } catch (e: Exception) { null }
+            // Busca detalhes 
+            val details = try {
+                client.get("$detailsBase/$endpoint/$bookId.json").body<OpenLibraryBookDetailsDto>()
+            } catch (e: Exception) { null }
+
+            val workId = if (isWork) {
+                bookId
+            } else {
+                details?.works?.firstOrNull()?.key?.substringAfterLast("/")
             }
 
-            val detailsDeferred = async {
+            //busca avaliações
+            val ratings = if (workId != null) {
                 try {
-                    client.get("$detailsBase/$endpoint/$bookId.json").body<OpenLibraryBookDetailsDto>()
+                    client.get("$detailsBase/works/$workId/ratings.json").body<OpenLibraryRatingResponse>()
                 } catch (e: Exception) { null }
-            }
+            } else null
 
-            val ratings = ratingsDeferred.await()
-            val details = detailsDeferred.await()
-
+            //parse da descrição
             val descriptionText = details?.description?.let { jsonElement ->
                 if (jsonElement is kotlinx.serialization.json.JsonObject) {
-                    jsonElement["value"]?.toString()?.removeSurrounding("\"")?.replace("\\n", "\n")
+                    jsonElement["value"]?.toString()?.removeSurrounding("\"")
                 } else {
-                    jsonElement.toString().removeSurrounding("\"").replace("\\n", "\n")
+                    jsonElement.toString().removeSurrounding("\"")
                 }
-            } ?: "Sem sinopse disponível."
+            } ?: ""
 
             val book = Book(
                 bookId = bookId,
                 sinopse = descriptionText,
                 notaApiExterna = ratings?.summary?.average ?: 0f,
-                isbn = details?.isbn13?.firstOrNull() ?: details?.isbn10?.firstOrNull()
+                isbn = details?.isbn13?.joinToString(", ") ?: details?.isbn10?.joinToString(", ")
             )
             Result.success(book)
         } catch (e: Exception) {
@@ -92,4 +118,5 @@ class OpenLibraryRepositoryImpl @Inject constructor(
     private fun getCoverUrl(coverId: Int?): String? {
         return coverId?.let { "https://covers.openlibrary.org/b/id/$it-L.jpg" }
     }
+
 }

@@ -39,7 +39,6 @@ class BookDetailsViewModel @Inject constructor(
     init {
         bookId?.let {
             loadBook(it)
-            loadReviews(it)
         }
     }
 
@@ -53,6 +52,7 @@ class BookDetailsViewModel @Inject constructor(
             val shelfStatus = manageShelfUseCase.getStatus(id)
 
             if (bookResult is SingleBookResult.Success) {
+                loadReviews(id)
                 val isFav = if (favResult is FavoriteResult.Success) favResult.isFavorite else false
 
                 _uiState.update {

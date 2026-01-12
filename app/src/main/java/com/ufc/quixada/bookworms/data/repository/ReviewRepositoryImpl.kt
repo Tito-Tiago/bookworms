@@ -1,11 +1,10 @@
 package com.ufc.quixada.bookworms.data.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreException
 import com.ufc.quixada.bookworms.domain.model.Review
 import com.ufc.quixada.bookworms.domain.repository.ReviewRepository
 import com.ufc.quixada.bookworms.domain.repository.ReviewResult
-import com.ufc.quixada.bookworms.domain.repository.SimpleResult
+import com.ufc.quixada.bookworms.domain.repository.SimpleReviewResult
 import com.ufc.quixada.bookworms.domain.repository.SingleReviewResult
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -83,7 +82,7 @@ class ReviewRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun deleteReview(reviewId: String, bookId: String): SimpleResult {
+    override suspend fun deleteReview(reviewId: String, bookId: String): SimpleReviewResult {
         return try {
             firestore.runTransaction { transaction ->
                 val oldReviewRef = firestore.collection("reviews").document(reviewId)
@@ -109,9 +108,9 @@ class ReviewRepositoryImpl @Inject constructor(
                 ))
             }
 
-            SimpleResult.Success
+            SimpleReviewResult.Success
         } catch (e: Exception) {
-            SimpleResult.Error(e.message ?: "Erro ao deletar review")
+            SimpleReviewResult.Error(e.message ?: "Erro ao deletar review")
         }
     }
 

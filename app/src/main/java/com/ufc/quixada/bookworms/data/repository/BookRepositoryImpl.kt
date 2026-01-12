@@ -6,6 +6,7 @@ import com.ufc.quixada.bookworms.data.local.entity.BookEntity
 import com.ufc.quixada.bookworms.domain.model.Book
 import com.ufc.quixada.bookworms.domain.repository.BookRepository
 import com.ufc.quixada.bookworms.domain.repository.BookResult
+import com.ufc.quixada.bookworms.domain.repository.SimpleBookResult
 import com.ufc.quixada.bookworms.domain.repository.SingleBookResult
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -34,6 +35,7 @@ class BookRepositoryImpl @Inject constructor(
 
     override suspend fun getBook(bookId: String): SingleBookResult {
         return try {
+            //tenta achar no room
             val localBook = bookDao.getBook(bookId)
             if (localBook != null) {
                 return SingleBookResult.Success(mapEntityToDomain(localBook))
@@ -75,7 +77,16 @@ class BookRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun saveBook(book: Book) {
+    override suspend fun saveBook(book: Book): SimpleBookResult {
+        try {
+            firestore.collection("books")
+                .document(book.bookId)
+                .set(book)
+                .await()
+        } catch (e: Exception) {
+            return SimpleBookResult.Error(e.message ?: "Erro ao salvar no firebase")
+        }
+
         val entity = BookEntity(
             bookId = book.bookId,
             titulo = book.titulo,
@@ -90,14 +101,7 @@ class BookRepositoryImpl @Inject constructor(
         )
         bookDao.insertBook(entity)
 
-        try {
-            firestore.collection("books")
-                .document(book.bookId)
-                .set(book)
-                .await()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        return SimpleBookResult.Success
     }
 
     override suspend fun getTrendingBooks(): BookResult {

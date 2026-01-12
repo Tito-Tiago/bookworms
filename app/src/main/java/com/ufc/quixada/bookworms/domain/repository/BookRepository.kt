@@ -12,11 +12,16 @@ sealed class SingleBookResult {
     data class Error(val message: String) : SingleBookResult()
 }
 
+sealed class SimpleBookResult {
+    object Success : SimpleBookResult()
+    data class Error(val message: String) : SimpleBookResult()
+}
+
 interface BookRepository {
     suspend fun getBooks(): BookResult
     suspend fun getBook(bookId: String): SingleBookResult
     suspend fun searchBooks(query: String): BookResult
-    suspend fun saveBook(book: Book)
+    suspend fun saveBook(book: Book) : SimpleBookResult
     suspend fun getTrendingBooks(): BookResult
     suspend fun getRecentBooks(): BookResult
 }
