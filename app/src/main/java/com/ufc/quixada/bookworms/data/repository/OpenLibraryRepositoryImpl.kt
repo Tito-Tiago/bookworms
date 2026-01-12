@@ -69,7 +69,11 @@ class OpenLibraryRepositoryImpl @Inject constructor(
             val ratings = ratingsDeferred.await()
             val details = detailsDeferred.await()
 
-            val descriptionText = details?.description?.let { jsonElement ->
+            if (details == null) {
+                return@coroutineScope Result.failure(Exception("Detalhes não encontrados"))
+            }
+
+            val descriptionText = details.description?.let { jsonElement ->
                 if (jsonElement is kotlinx.serialization.json.JsonObject) {
                     jsonElement["value"]?.toString()?.removeSurrounding("\"")?.replace("\\n", "\n")
                 } else {
@@ -79,9 +83,13 @@ class OpenLibraryRepositoryImpl @Inject constructor(
 
             val book = Book(
                 bookId = bookId,
+                titulo = details.title ?: "Título Indisponível",
+                autor = "Autor (Detalhes na Web)",
                 sinopse = descriptionText,
+                capaUrl = getCoverUrl(details.covers?.firstOrNull()),
                 notaApiExterna = ratings?.summary?.average ?: 0f,
-                isbn = details?.isbn13?.firstOrNull() ?: details?.isbn10?.firstOrNull()
+                isbn = details.isbn13?.firstOrNull() ?: details.isbn10?.firstOrNull(),
+                fonteApi = "OpenLibrary"
             )
             Result.success(book)
         } catch (e: Exception) {

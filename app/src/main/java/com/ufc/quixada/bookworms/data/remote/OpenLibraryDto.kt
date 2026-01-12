@@ -34,9 +34,11 @@ data class RatingSummary(
 
 @Serializable
 data class OpenLibraryBookDetailsDto(
+    val title: String? = null,
     val description: JsonElement? = null,
     @SerialName("isbn_13")
     val isbn13: List<String>? = null,
     @SerialName("isbn_10")
-    val isbn10: List<String>? = null
+    val isbn10: List<String>? = null,
+    val covers: List<Int>? = null,
 )
