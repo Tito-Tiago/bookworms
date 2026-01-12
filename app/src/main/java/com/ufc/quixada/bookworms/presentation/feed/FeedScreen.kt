@@ -19,12 +19,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -42,14 +40,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.ufc.quixada.bookworms.domain.model.Activity
 import com.ufc.quixada.bookworms.domain.model.Book
-import com.ufc.quixada.bookworms.presentation.home.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedScreen(
     onBookClick: (String) -> Unit,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: FeedViewModel = hiltViewModel() // Usa o novo ViewModel
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -69,49 +67,75 @@ fun FeedScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(MaterialTheme.colorScheme.background),
-            contentPadding = PaddingValues(bottom = 100.dp)
-        ) {
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(MaterialTheme.colorScheme.background),
+                contentPadding = PaddingValues(bottom = 100.dp)
+            ) {
 
-            item {
-                SectionTitle(title = "Em Alta na Comunidade")
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(uiState.books) { book ->
-                        BookCardCarousel(book = book, onClick = { onBookClick(book.bookId) })
+                // Seção: Em Alta
+                if (uiState.trendingBooks.isNotEmpty()) {
+                    item {
+                        SectionTitle(title = "Em Alta na Comunidade")
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(uiState.trendingBooks) { book ->
+                                BookCardCarousel(book = book, onClick = { onBookClick(book.bookId) })
+                            }
+                        }
+                    }
+                    item { Spacer(modifier = Modifier.height(24.dp)) }
+                }
+
+                // Seção: Novidades
+                if (uiState.recentBooks.isNotEmpty()) {
+                    item {
+                        SectionTitle(title = "Novidades")
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(uiState.recentBooks) { book ->
+                                BookCardCarousel(book = book, onClick = { onBookClick(book.bookId) })
+                            }
+                        }
+                    }
+                    item { Spacer(modifier = Modifier.height(24.dp)) }
+                }
+
+                // Seção: Atividades
+                item {
+                    SectionTitle(title = "Atividades dos Amigos")
+                }
+
+                if (uiState.activities.isEmpty()) {
+                    item {
+                        Text(
+                            text = "Nenhuma atividade recente ou você ainda não segue ninguém.",
+                            modifier = Modifier.padding(16.dp),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray
+                        )
+                    }
+                } else {
+                    items(uiState.activities) { activity ->
+                        ActivityItem(activity = activity, onBookClick = onBookClick)
                     }
                 }
-            }
-
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-
-            item {
-                SectionTitle(title = "Novidades")
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(uiState.books.reversed()) { book -> // Inverte só pra variar visualmente
-                        BookCardCarousel(book = book, onClick = { onBookClick(book.bookId) })
-                    }
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-
-            item {
-                SectionTitle(title = "Atividades dos Amigos")
-            }
-
-            // Exemplo de atividades mockadas (já que não temos back-end disso ainda)
-            items(5) {
-                ActivityItemMock()
             }
         }
     }
@@ -157,42 +181,50 @@ fun BookCardCarousel(book: Book, onClick: () -> Unit) {
 }
 
 @Composable
-fun ActivityItemMock() {
+fun ActivityItem(activity: Activity, onBookClick: (String) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable {
+                // Se tiver bookId vinculado, navega para o livro
+                activity.bookId?.let { onBookClick(it) }
+            }
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
             .padding(12.dp)
     ) {
-        // Avatar
+        // Avatar Placeholder (Poderia carregar foto se o Activity tivesse userUrl)
         Box(
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(Color.Gray)
-        )
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "U",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
 
         Spacer(modifier = Modifier.width(12.dp))
 
         Column {
             Text(
-                text = "Maria Silva avaliou um livro",
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+                text = "Um amigo ${activity.descricao}",
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface
             )
+
             Spacer(modifier = Modifier.height(4.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Star, null, tint = Color(0xFFFFD700), modifier = Modifier.size(16.dp))
-                Icon(Icons.Default.Star, null, tint = Color(0xFFFFD700), modifier = Modifier.size(16.dp))
-                Icon(Icons.Default.Star, null, tint = Color(0xFFFFD700), modifier = Modifier.size(16.dp))
-                Icon(Icons.Default.Star, null, tint = Color(0xFFFFD700), modifier = Modifier.size(16.dp))
-                Icon(Icons.Default.Star, null, tint = Color(0xFFFFD700), modifier = Modifier.size(16.dp))
-            }
+
+            // Exibe a data de forma simples (pode usar formatação melhor depois)
             Text(
-                text = "Simplesmente incrível! Não consegui parar de ler.",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.Gray,
-                modifier = Modifier.padding(top = 4.dp)
+                text = "Recentemente",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.Gray
             )
         }
     }

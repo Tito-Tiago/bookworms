@@ -15,6 +15,7 @@ interface FollowRepository {
     suspend fun getFollowersCount(userId: String): Int
     suspend fun getFollowingCount(userId: String): Int
 
+    suspend fun getFollowedUserIds(currentUserId: String): List<String>
     fun getFollowersCountFlow(userId: String): Flow<Int>
     fun getFollowingCountFlow(userId: String): Flow<Int>
 }

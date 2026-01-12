@@ -89,4 +89,17 @@ class FollowRepositoryImpl @Inject constructor(
             }
         awaitClose { registration.remove() }
     }
+
+    override suspend fun getFollowedUserIds(currentUserId: String): List<String> {
+        return try {
+            val snapshot = collection
+                .whereEqualTo("userIdSeguidor", currentUserId)
+                .get()
+                .await()
+
+            snapshot.documents.mapNotNull { it.getString("userIdSeguido") }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
 }
