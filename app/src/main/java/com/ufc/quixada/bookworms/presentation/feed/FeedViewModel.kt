@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ufc.quixada.bookworms.domain.model.Activity
 import com.ufc.quixada.bookworms.domain.model.Book
+import com.ufc.quixada.bookworms.domain.model.Review
 import com.ufc.quixada.bookworms.domain.repository.BookResult
 import com.ufc.quixada.bookworms.domain.repository.BookRepository
 import com.ufc.quixada.bookworms.domain.usecase.feed.GetFeedUseCase
@@ -20,6 +21,7 @@ data class FeedUiState(
     val trendingBooks: List<Book> = emptyList(),
     val recentBooks: List<Book> = emptyList(),
     val activities: List<Activity> = emptyList(),
+    val feedReviews: List<Pair<Review, Book?>> = emptyList(), // Novo campo
     val error: String? = null
 )
 
@@ -51,12 +53,16 @@ class FeedViewModel @Inject constructor(
             // Carregar Atividades
             val activities = getFeedUseCase()
 
+            // Carregar Reviews do Feed (Amigos)
+            val reviews = getFeedUseCase.getFeedReviews()
+
             _uiState.update {
                 it.copy(
                     isLoading = false,
                     trendingBooks = trending,
                     recentBooks = recent,
-                    activities = activities
+                    activities = activities,
+                    feedReviews = reviews
                 )
             }
         }

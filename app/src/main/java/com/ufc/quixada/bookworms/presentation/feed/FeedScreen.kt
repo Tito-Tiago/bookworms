@@ -42,12 +42,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.ufc.quixada.bookworms.domain.model.Activity
 import com.ufc.quixada.bookworms.domain.model.Book
+import com.ufc.quixada.bookworms.presentation.components.ReviewCard // Importação adicionada
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedScreen(
     onBookClick: (String) -> Unit,
-    viewModel: FeedViewModel = hiltViewModel() // Usa o novo ViewModel
+    viewModel: FeedViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -117,12 +118,38 @@ fun FeedScreen(
                     item { Spacer(modifier = Modifier.height(24.dp)) }
                 }
 
-                // Seção: Atividades
-                item {
-                    SectionTitle(title = "Atividades dos Amigos")
+                // ============================================
+                // NOVA SEÇÃO: Feed de Reviews (Amigos)
+                // ============================================
+                if (uiState.feedReviews.isNotEmpty()) {
+                    item {
+                        SectionTitle(title = "Resenhas dos Amigos")
+                    }
+                    items(uiState.feedReviews) { (review, book) ->
+                        Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                            ReviewCard(
+                                userName = review.userName,
+                                bookName = book?.titulo ?: "Livro Desconhecido",
+                                nota = review.nota,
+                                contemSpoiler = review.contemSpoiler,
+                                textoResenha = review.textoResenha,
+                                onTreeDotsClick = { /* Implementar menu se necessário */ }
+                            )
+                        }
+                    }
+                    item { Spacer(modifier = Modifier.height(24.dp)) }
                 }
 
-                if (uiState.activities.isEmpty()) {
+                // Seção: Outras Atividades (Opcional, se quiser manter)
+                if (uiState.activities.isNotEmpty()) {
+                    item {
+                        SectionTitle(title = "Outras Atividades")
+                    }
+                    items(uiState.activities) { activity ->
+                        ActivityItem(activity = activity, onBookClick = onBookClick)
+                    }
+                } else if (uiState.feedReviews.isEmpty()) {
+                    // Mensagem vazia apenas se não tiver nem reviews nem activities
                     item {
                         Text(
                             text = "Nenhuma atividade recente ou você ainda não segue ninguém.",
@@ -130,10 +157,6 @@ fun FeedScreen(
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Gray
                         )
-                    }
-                } else {
-                    items(uiState.activities) { activity ->
-                        ActivityItem(activity = activity, onBookClick = onBookClick)
                     }
                 }
             }
@@ -186,14 +209,12 @@ fun ActivityItem(activity: Activity, onBookClick: (String) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                // Se tiver bookId vinculado, navega para o livro
                 activity.bookId?.let { onBookClick(it) }
             }
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
             .padding(12.dp)
     ) {
-        // Avatar Placeholder (Poderia carregar foto se o Activity tivesse userUrl)
         Box(
             modifier = Modifier
                 .size(40.dp)
@@ -220,7 +241,6 @@ fun ActivityItem(activity: Activity, onBookClick: (String) -> Unit) {
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // Exibe a data de forma simples (pode usar formatação melhor depois)
             Text(
                 text = "Recentemente",
                 style = MaterialTheme.typography.labelSmall,
