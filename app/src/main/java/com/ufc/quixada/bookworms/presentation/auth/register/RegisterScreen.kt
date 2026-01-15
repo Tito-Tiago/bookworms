@@ -65,7 +65,7 @@ fun RegisterScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primary)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .verticalScroll(rememberScrollState())
             .padding(top = 48.dp, bottom = 48.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -100,7 +100,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = uiState.nome,
                 onValueChange = viewModel::onNomeChange,
-                label = { Text("Nome Completo", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)) },
+                label = { Text("Nome Completo", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isLoading,
@@ -113,10 +113,10 @@ fun RegisterScreen(
                 ),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                     cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                     focusedLabelColor = MaterialTheme.colorScheme.primary,
                 )
             )
@@ -125,7 +125,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = uiState.email,
                 onValueChange = viewModel::onEmailChange,
-                label = { Text("E-mail", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)) },
+                label = { Text("E-mail", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isLoading,
@@ -138,10 +138,10 @@ fun RegisterScreen(
                 ),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                     cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                     focusedLabelColor = MaterialTheme.colorScheme.primary,
                 )
             )
@@ -150,7 +150,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = uiState.password,
                 onValueChange = viewModel::onPasswordChange,
-                label = { Text("Senha", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)) },
+                label = { Text("Senha", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isLoading,
@@ -173,10 +173,10 @@ fun RegisterScreen(
                 ),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                     cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                     focusedLabelColor = MaterialTheme.colorScheme.primary,
                 )
             )
@@ -185,7 +185,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = uiState.confirmPassword,
                 onValueChange = viewModel::onConfirmPasswordChange,
-                label = { Text("Confirme a Senha", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)) },
+                label = { Text("Confirme a Senha", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isLoading,
@@ -208,10 +208,10 @@ fun RegisterScreen(
                 ),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                     cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                     focusedLabelColor = MaterialTheme.colorScheme.primary,
                 )
             )
@@ -235,14 +235,14 @@ fun RegisterScreen(
                     .height(56.dp),
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             ) {
                 if (uiState.isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onSecondary
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
                     Text(

@@ -67,10 +67,14 @@ fun ReviewFeedCard(
     var showReportModal by remember { mutableStateOf(false) }
     var showSuccessModal by remember { mutableStateOf(false) }
 
+    val containerColor = MaterialTheme.colorScheme.surfaceVariant
+    val contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val primaryColor = MaterialTheme.colorScheme.primary
+
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFE5F7D7),
+            containerColor = containerColor,
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -89,17 +93,17 @@ fun ReviewFeedCard(
                     Icon(
                         imageVector = Icons.Default.AccountCircle,
                         contentDescription = "Foto do perfil de $userName",
-                        tint = Color.DarkGray,
+                        tint = contentColor.copy(alpha = 0.8f),
                         modifier = Modifier.size(40.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
 
                     Text(
                         text = buildAnnotatedString {
-                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.DarkGray, fontSize = 16.sp)) {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = contentColor, fontSize = 16.sp)) {
                                 append(userName)
                             }
-                            withStyle(style = SpanStyle(fontWeight = FontWeight.Normal, color = Color.Gray, fontSize = 14.sp)) {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Normal, color = contentColor.copy(alpha = 0.7f), fontSize = 14.sp)) {
                                 append(" fez uma resenha")
                             }
                         }
@@ -110,7 +114,7 @@ fun ReviewFeedCard(
                     Icon(
                         imageVector = Icons.Default.Flag,
                         contentDescription = "Denunciar resenha",
-                        tint = Color.Gray
+                        tint = contentColor.copy(alpha = 0.6f)
                     )
                 }
             }
@@ -142,7 +146,7 @@ fun ReviewFeedCard(
                         text = bookTitle,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black
+                        color = contentColor // Adaptável
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -156,7 +160,7 @@ fun ReviewFeedCard(
                                 Icon(
                                     imageVector = Icons.Default.Warning,
                                     contentDescription = "Alerta de Spoiler",
-                                    tint = Color(0xFFD32F2F),
+                                    tint = MaterialTheme.colorScheme.error,
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
@@ -164,15 +168,15 @@ fun ReviewFeedCard(
                                     text = "Contém Spoilers!",
                                     style = MaterialTheme.typography.bodySmall,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFFD32F2F)
+                                    color = MaterialTheme.colorScheme.error
                                 )
                             }
                             Spacer(modifier = Modifier.height(8.dp))
                             Button(
                                 onClick = { isSpoilerVisible = true },
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF388E3C),
-                                    contentColor = Color.White
+                                    containerColor = primaryColor,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
                                 ),
                                 shape = RoundedCornerShape(20.dp),
                                 modifier = Modifier.height(40.dp)
@@ -189,7 +193,7 @@ fun ReviewFeedCard(
                                 Text(
                                     text = reviewText,
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = Color.Black,
+                                    color = contentColor,
                                     maxLines = 10,
                                     overflow = TextOverflow.Ellipsis
                                 )
@@ -201,6 +205,7 @@ fun ReviewFeedCard(
         }
     }
 
+    // Modais mantidos iguais, apenas ajustando cores se necessário
     if (showReportModal) {
         Dialog(onDismissRequest = { showReportModal = false }) {
             var checkedOffensive by remember { mutableStateOf(false) }
@@ -211,7 +216,7 @@ fun ReviewFeedCard(
 
             Card(
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
@@ -219,7 +224,7 @@ fun ReviewFeedCard(
                     Icon(
                         imageVector = Icons.Default.Warning,
                         contentDescription = null,
-                        tint = Color(0xFFD32F2F), // Vermelho
+                        tint = MaterialTheme.colorScheme.error,
                         modifier = Modifier
                             .size(48.dp)
                             .align(Alignment.CenterHorizontally)
@@ -235,7 +240,7 @@ fun ReviewFeedCard(
                             text = "Denunciar resenha",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
-                            color = Color.Black
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         IconButton(
                             onClick = { showReportModal = false },
@@ -266,7 +271,7 @@ fun ReviewFeedCard(
                         },
                         enabled = isReportEnabled,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFD32F2F),
+                            containerColor = MaterialTheme.colorScheme.error,
                             contentColor = Color.White,
                             disabledContainerColor = Color.LightGray,
                             disabledContentColor = Color.White
@@ -291,7 +296,7 @@ fun ReviewFeedCard(
         Dialog(onDismissRequest = { showSuccessModal = false }) {
             Card(
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
@@ -303,7 +308,7 @@ fun ReviewFeedCard(
                     Icon(
                         imageVector = Icons.Filled.CheckCircle,
                         contentDescription = null,
-                        tint = Color(0xFF388E3C), // Verde
+                        tint = Color(0xFF388E3C),
                         modifier = Modifier
                             .size(64.dp)
                             .padding(bottom = 16.dp)
@@ -313,7 +318,7 @@ fun ReviewFeedCard(
                         text = "Denuncia enviada",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
@@ -356,14 +361,14 @@ private fun ReportCheckboxItem(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = CheckboxDefaults.colors(
-                checkedColor = Color(0xFFD32F2F),
+                checkedColor = MaterialTheme.colorScheme.error,
                 uncheckedColor = Color.Gray
             )
         )
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color.Black
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }

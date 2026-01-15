@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -98,7 +96,7 @@ fun BookDetailsScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Voltar",
-                            tint = MaterialTheme.colorScheme.onBackground
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 },
@@ -213,7 +211,7 @@ fun BookDetailsScreen(
                             style = MaterialTheme.typography.titleMedium.copy(
                                 fontWeight = FontWeight.Bold
                             ),
-                            color = MaterialTheme.colorScheme.onPrimary,
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                             textAlign = TextAlign.Center
                         )
 
@@ -231,7 +229,11 @@ fun BookDetailsScreen(
                             ) {
                                 Icon(Icons.Default.Star, null, tint = Color(0xFFFFD700), modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("${book.notaMediaComunidade}", fontWeight = FontWeight.Bold)
+                                Text(
+                                    "${book.notaMediaComunidade}",
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
 
                             Button(
@@ -293,6 +295,7 @@ fun BookDetailsScreen(
                                 elevation = CardDefaults.cardElevation(
                                     defaultElevation = 8.dp
                                 ),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                             ) {
                                 Column(
                                     modifier = Modifier
@@ -302,7 +305,8 @@ fun BookDetailsScreen(
                                     Text(
                                         text = "Toque para dar uma nota",
                                         textAlign = TextAlign.Center,
-                                        modifier = Modifier.fillMaxWidth()
+                                        modifier = Modifier.fillMaxWidth(),
+                                        color = MaterialTheme.colorScheme.onSurface
                                     )
 
                                     RatingStars(
@@ -340,7 +344,8 @@ fun BookDetailsScreen(
                                         )
                                         Text(
                                             text = "Contém spoilers",
-                                            fontSize = 16.sp
+                                            fontSize = 16.sp,
+                                            color = MaterialTheme.colorScheme.onSurface
                                         )
                                     }
 
@@ -390,7 +395,8 @@ fun BookDetailsScreen(
     if (showShelfModal) {
         ModalBottomSheet(
             onDismissRequest = { showShelfModal = false },
-            sheetState = sheetState
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surface
         ) {
             Column(
                 modifier = Modifier
@@ -402,7 +408,8 @@ fun BookDetailsScreen(
                     text = "Adicionar à estante",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp)
+                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 val options = listOf(
@@ -414,7 +421,7 @@ fun BookDetailsScreen(
                 options.forEach { (type, label, icon) ->
                     val isSelected = uiState.shelfType == type
                     ListItem(
-                        headlineContent = { Text(label) },
+                        headlineContent = { Text(label, color = MaterialTheme.colorScheme.onSurface) },
                         leadingContent = {
                             Icon(
                                 imageVector = icon,

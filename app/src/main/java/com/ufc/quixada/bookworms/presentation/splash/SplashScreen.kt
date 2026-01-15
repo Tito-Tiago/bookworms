@@ -34,7 +34,7 @@ fun SplashScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primary),
+            .background(MaterialTheme.colorScheme.surfaceVariant),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -46,7 +46,7 @@ fun SplashScreen(
 
         Text(
             text = "Bookworms",
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = MaterialTheme.colorScheme.primary,
             style = MaterialTheme.typography.headlineLarge.copy(
                 fontWeight = FontWeight.Bold,
                 fontSize = 48.sp

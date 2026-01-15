@@ -11,51 +11,64 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = BW_Primary_Green,
-    onPrimary = BW_Dark_Green, // Texto escuro sobre o verde claro para leitura
-    primaryContainer = BW_Dark_Green,
-    onPrimaryContainer = BW_Primary_Green,
+    // Primária: Verde Claro (Mantém a identidade principal legível no escuro)
+    primary = BW_Secondary_LightGreen,
+    onPrimary = BW_Primary_DarkGreen,
+    primaryContainer = BW_Primary_DarkGreen,
+    onPrimaryContainer = BW_Secondary_LightGreen,
 
-    secondary = BW_Secondary_Purple,
-    onSecondary = BW_White,
-    secondaryContainer = BW_Secondary_Purple,
-    onSecondaryContainer = BW_White,
+    // Secundária: Lilás (Acentos e botões flutuantes)
+    secondary = BW_Purple_Light,
+    onSecondary = BW_Purple_Deep,
+    secondaryContainer = BW_Purple_Deep,
+    onSecondaryContainer = BW_Purple_Light,
 
-    tertiary = BW_Dark_Green,
+    // Terciária: Lilás também para consistência
+    tertiary = BW_Purple_Light,
+    onTertiary = BW_Purple_Deep,
 
-    background = BW_Black,
+    background = BW_Background_Black,
     onBackground = BW_White,
 
-    surface = BW_Black,
+    surface = BW_Surface_DarkGrey, // Cards principais continuam cinza escuro para não cansar a vista
     onSurface = BW_White,
 
-    error = BW_Secondary_Purple // Usando o roxo como destaque de erro/atenção no tema escuro se desejar, ou manter padrão
+    // --- MUDANÇA AQUI: Fundo Secundário agora é ROXO ---
+    // Containers secundários agora terão o fundo roxo escuro
+    surfaceVariant = BW_Purple_Deep,
+    onSurfaceVariant = BW_Purple_Light, // Texto lilás sobre o fundo roxo
+
+    error = BW_Error,
+    onError = BW_White
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = BW_Primary_Green,
-    onPrimary = BW_Dark_Green, // Texto escuro sobre o verde claro
-    primaryContainer = BW_Primary_Green,
-    onPrimaryContainer = BW_Dark_Green,
+    // Light Mode mantém o visual "Clean" Creme + Verde
+    primary = BW_Primary_DarkGreen,
+    onPrimary = BW_White,
 
-    secondary = BW_Secondary_Purple,
-    onSecondary = BW_White,
+    secondary = BW_Secondary_LightGreen,
+    onSecondary = BW_Primary_DarkGreen,
 
-    tertiary = BW_Dark_Green,
+    tertiary = BW_Purple_Deep, // Detalhes sutis em roxo
     onTertiary = BW_White,
 
-    background = BW_White,
-    onBackground = BW_Black,
+    background = BW_Background_YellowishWhite,
+    onBackground = BW_Primary_DarkGreen,
 
     surface = BW_White,
-    onSurface = BW_Black,
+    onSurface = BW_Primary_DarkGreen,
+
+    surfaceVariant = BW_Detail_PaleGreen, // Fundo secundário verde pálido
+    onSurfaceVariant = BW_Primary_DarkGreen,
+
+    error = BW_Error,
+    onError = BW_White
 )
 
 @Composable
 fun BookwormsTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color desativado por padrão para garantir que a identidade visual seja usada
-    // Se quiser que o Android 12+ use as cores do papel de parede do usuário, mude para true
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
@@ -64,7 +77,6 @@ fun BookwormsTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }

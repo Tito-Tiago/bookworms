@@ -98,7 +98,7 @@ fun LoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primary)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .verticalScroll(rememberScrollState())
             .padding(top = 48.dp, bottom = 48.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -135,7 +135,7 @@ fun LoginScreen(
             OutlinedTextField(
                 value = uiState.email,
                 onValueChange = viewModel::onEmailChange,
-                label = { Text("E-mail", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)) },
+                label = { Text("E-mail", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isLoading,
@@ -148,10 +148,10 @@ fun LoginScreen(
                 ),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                     cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                     focusedLabelColor = MaterialTheme.colorScheme.primary,
                 )
             )
@@ -160,7 +160,7 @@ fun LoginScreen(
             OutlinedTextField(
                 value = uiState.password,
                 onValueChange = viewModel::onPasswordChange,
-                label = { Text("Senha", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)) },
+                label = { Text("Senha", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isLoading,
@@ -183,10 +183,10 @@ fun LoginScreen(
                 ),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                     cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                     focusedLabelColor = MaterialTheme.colorScheme.primary,
                 )
             )
@@ -211,14 +211,14 @@ fun LoginScreen(
                     .height(56.dp),
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             ) {
                 if (uiState.isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onSecondary
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
                     Text(
@@ -240,8 +240,8 @@ fun LoginScreen(
                 shape = RoundedCornerShape(8.dp),
                 border = BorderStroke(1.dp, Color.LightGray),
                 colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = Color.White,
-                    contentColor = Color.Black
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
                 )
             ) {
                 Row(
@@ -261,7 +261,7 @@ fun LoginScreen(
                         text = "Entrar com Google",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 }
             }
