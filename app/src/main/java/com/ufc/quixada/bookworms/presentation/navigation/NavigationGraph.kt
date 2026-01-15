@@ -103,6 +103,12 @@ fun NavigationGraph(navController: androidx.navigation.NavHostController) {
                 onEditClick = {
                     navController.navigate("profile_edit")
                 },
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Main.route) { inclusive = true }
+                    }
+                },
+                onThemeChange = {  },
                 onBookClick = { bookId ->
                     navController.navigate(Screen.BookDetails.createRoute(bookId))
                 }

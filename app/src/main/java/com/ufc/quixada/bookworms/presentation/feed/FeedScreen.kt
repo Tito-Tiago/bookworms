@@ -19,10 +19,16 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert // Import necessário
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu // Import necessário
+import androidx.compose.material3.DropdownMenuItem // Import necessário
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon // Import necessário
+import androidx.compose.material3.IconButton // Import necessário
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,6 +36,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf // Import necessário
+import androidx.compose.runtime.remember // Import necessário
+import androidx.compose.runtime.setValue // Import necessário
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,15 +51,18 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.ufc.quixada.bookworms.domain.model.Activity
 import com.ufc.quixada.bookworms.domain.model.Book
-import com.ufc.quixada.bookworms.presentation.components.ReviewCard // Importação adicionada
+import com.ufc.quixada.bookworms.presentation.components.ReviewCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedScreen(
     onBookClick: (String) -> Unit,
+    onLogout: () -> Unit,
+    onThemeChange: () -> Unit,
     viewModel: FeedViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var showMenu by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -63,6 +75,34 @@ fun FeedScreen(
                             color = MaterialTheme.colorScheme.primary
                         )
                     )
+                },
+                actions = {
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "Mais opções"
+                        )
+                    }
+                    // Menu Dropdown
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Mudar Tema") },
+                            onClick = {
+                                showMenu = false
+                                onThemeChange()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Sair") },
+                            onClick = {
+                                showMenu = false
+                                onLogout()
+                            }
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
             )
@@ -102,7 +142,6 @@ fun FeedScreen(
                     item { Spacer(modifier = Modifier.height(24.dp)) }
                 }
 
-                // Seção: Novidades
                 if (uiState.recentBooks.isNotEmpty()) {
                     item {
                         SectionTitle(title = "Novidades")
@@ -118,9 +157,6 @@ fun FeedScreen(
                     item { Spacer(modifier = Modifier.height(24.dp)) }
                 }
 
-                // ============================================
-                // NOVA SEÇÃO: Feed de Reviews (Amigos)
-                // ============================================
                 if (uiState.feedReviews.isNotEmpty()) {
                     item {
                         SectionTitle(title = "Resenhas dos Amigos")
@@ -140,7 +176,7 @@ fun FeedScreen(
                     item { Spacer(modifier = Modifier.height(24.dp)) }
                 }
 
-                // Seção: Outras Atividades (Opcional, se quiser manter)
+                // Seção: Outras Atividades
                 if (uiState.activities.isNotEmpty()) {
                     item {
                         SectionTitle(title = "Outras Atividades")
@@ -149,7 +185,6 @@ fun FeedScreen(
                         ActivityItem(activity = activity, onBookClick = onBookClick)
                     }
                 } else if (uiState.feedReviews.isEmpty()) {
-                    // Mensagem vazia apenas se não tiver nem reviews nem activities
                     item {
                         Text(
                             text = "Nenhuma atividade recente ou você ainda não segue ninguém.",
