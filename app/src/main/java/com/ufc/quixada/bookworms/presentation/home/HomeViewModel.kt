@@ -36,7 +36,6 @@ class HomeViewModel @Inject constructor(
     init {
         observeQuery()
         observeFavorites()
-        onSearchQueryChange("Harry Potter")
     }
 
 
