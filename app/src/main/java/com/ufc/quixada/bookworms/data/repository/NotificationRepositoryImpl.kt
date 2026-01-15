@@ -14,8 +14,10 @@ class NotificationRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : NotificationRepository {
 
+    private val collection = firestore.collection("notifications")
+
     override fun getNotifications(userId: String): Flow<List<Notification>> = callbackFlow {
-        val subscription = firestore.collection("notifications")
+        val subscription = collection
             .whereEqualTo("userId", userId)
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, _ ->
@@ -28,17 +30,11 @@ class NotificationRepositoryImpl @Inject constructor(
     }
 
     override suspend fun sendNotification(notification: Notification) {
-        val docRef = firestore.collection("notifications").document()
-        firestore.collection("notifications")
-            .document(docRef.id)
-            .set(notification.copy(id = docRef.id))
-            .await()
+        val docId = if (notification.id.isNotBlank()) notification.id else "${notification.userId}_${notification.bookId}_${notification.senderId}"
+        collection.document(docId).set(notification.copy(id = docId)).await()
     }
 
     override suspend fun markAsRead(notificationId: String) {
-        firestore.collection("notifications")
-            .document(notificationId)
-            .update("read", true)
-            .await()
+        collection.document(notificationId).update("read", true).await()
     }
 }

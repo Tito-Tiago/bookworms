@@ -15,7 +15,12 @@ class ActivityRepositoryImpl @Inject constructor(
 
     override suspend fun createActivity(activity: Activity) {
         try {
-            collection.add(activity).await()
+            val docId = activity.idReferencia.ifBlank { activity.activityId }
+            if (docId.isNotBlank()) {
+                collection.document(docId).set(activity).await()
+            } else {
+                collection.add(activity).await()
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -23,9 +28,7 @@ class ActivityRepositoryImpl @Inject constructor(
 
     override suspend fun getActivitiesFromUsers(userIds: List<String>): List<Activity> {
         if (userIds.isEmpty()) return emptyList()
-
         val safeUserIds = userIds.take(30)
-
         return try {
             collection
                 .whereIn("userIdOrigem", safeUserIds)

@@ -4,14 +4,7 @@ import com.ufc.quixada.bookworms.domain.model.Activity
 import com.ufc.quixada.bookworms.domain.model.ActivityReferenceType
 import com.ufc.quixada.bookworms.domain.model.Notification
 import com.ufc.quixada.bookworms.domain.model.Review
-import com.ufc.quixada.bookworms.domain.repository.ActivityRepository
-import com.ufc.quixada.bookworms.domain.repository.AuthRepository
-import com.ufc.quixada.bookworms.domain.repository.BookRepository
-import com.ufc.quixada.bookworms.domain.repository.FollowRepository
-import com.ufc.quixada.bookworms.domain.repository.NotificationRepository
-import com.ufc.quixada.bookworms.domain.repository.ReviewRepository
-import com.ufc.quixada.bookworms.domain.repository.SingleBookResult
-import com.ufc.quixada.bookworms.domain.repository.SingleReviewResult
+import com.ufc.quixada.bookworms.domain.repository.*
 import com.ufc.quixada.bookworms.presentation.notification.NotificationHelper
 import java.util.UUID
 import javax.inject.Inject
@@ -37,8 +30,9 @@ class AddReviewUseCase @Inject constructor(
         if (bookResult is SingleBookResult.Error) return SingleReviewResult.Error(bookResult.message)
         if (currentUser == null) return SingleReviewResult.Error("Usuário não logado")
 
+        val reviewId = UUID.randomUUID().toString()
         val review = Review(
-            reviewId = UUID.randomUUID().toString(),
+            reviewId = reviewId,
             userId = currentUser.uid,
             bookId = bookId,
             nota = nota,
@@ -54,10 +48,11 @@ class AddReviewUseCase @Inject constructor(
 
             activityRepository.createActivity(
                 Activity(
+                    activityId = reviewId,
                     userIdOrigem = currentUser.uid,
                     userIdDono = currentUser.uid,
                     tipoReferencia = ActivityReferenceType.REVIEW,
-                    idReferencia = review.reviewId,
+                    idReferencia = reviewId,
                     bookId = bookId,
                     tipoAtividade = "REVIEW",
                     descricao = "avaliou o livro com $nota estrelas"
@@ -71,6 +66,7 @@ class AddReviewUseCase @Inject constructor(
 
                 notificationRepository.sendNotification(
                     Notification(
+                        id = "${followerId}_$reviewId",
                         userId = followerId,
                         senderId = currentUser.uid,
                         title = title,
@@ -78,7 +74,6 @@ class AddReviewUseCase @Inject constructor(
                         bookId = bookId
                     )
                 )
-
                 notificationHelper.showSystemNotification(title, message)
             }
         }
