@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -85,9 +87,7 @@ fun BookDetailsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
     var showShelfModal by remember { mutableStateOf(false) }
-    var showReportModal by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
-    val reportSheetState = rememberModalBottomSheetState()
 
     Scaffold(
         topBar = {
@@ -231,14 +231,15 @@ fun BookDetailsScreen(
                             ) {
                                 Icon(Icons.Default.Star, null, tint = Color(0xFFFFD700), modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("%.1f".format(book.notaMediaComunidade), fontWeight = FontWeight.Bold)
+                                Text("${book.notaMediaComunidade}", fontWeight = FontWeight.Bold)
                             }
 
                             Button(
                                 onClick = { showShelfModal = true },
                                 shape = RoundedCornerShape(24.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (uiState.shelfType != null) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
+                                    containerColor = if (uiState.shelfType != null) Color(0xFF388E3C) else MaterialTheme.colorScheme.primary,
+                                    contentColor = if (uiState.shelfType != null) Color.White else MaterialTheme.colorScheme.onPrimary
                                 )
                             ) {
                                 Icon(
@@ -333,7 +334,6 @@ fun BookDetailsScreen(
                                     ) {
                                         Checkbox(
                                             checked = uiState.contemSpoiler,
-                                            enabled = uiState.textoResenha.isNotBlank(),
                                             onCheckedChange = {
                                                 viewModel.toggleContemSpoiler()
                                             }
@@ -347,7 +347,6 @@ fun BookDetailsScreen(
                                     BookwormsButton(
                                         text = "Fazer resenha",
                                         onClick = { viewModel.onFazerResenhaClick() },
-                                        enabled = uiState.nota > 0,
                                         icon = painterResource(ic_teclado),
                                         iconContentDescription = "Icone de teclado",
                                         modifier = Modifier.padding(bottom = 4.dp)
@@ -370,7 +369,7 @@ fun BookDetailsScreen(
                                                 bookName = it,
                                                 nota = review.nota,
                                                 textoResenha = review.textoResenha,
-                                                onTreeDotsClick = { showReportModal = true },
+                                                onTreeDotsClick = { },
                                                 contemSpoiler = review.contemSpoiler
                                             )
                                             Spacer(modifier = Modifier.height(24.dp))
@@ -440,49 +439,12 @@ fun BookDetailsScreen(
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                 TextButton(
-                    onClick = { },
+                    onClick = { /* Implementar HU-06 futuramente */ },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(Icons.Default.Add, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Adicionar uma nova estante")
-                }
-            }
-        }
-    }
-
-    if (showReportModal) {
-        ModalBottomSheet(
-            onDismissRequest = { showReportModal = false },
-            sheetState = reportSheetState
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 32.dp)
-            ) {
-                Text(
-                    text = "Denunciar Avaliação",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp)
-                )
-
-                val reportReasons = listOf(
-                    "Conteúdo Ofensivo",
-                    "Spam",
-                    "Spoiler não marcado",
-                    "Outro"
-                )
-
-                reportReasons.forEach { reason ->
-                    ListItem(
-                        headlineContent = { Text(reason) },
-                        modifier = Modifier.clickable {
-                            showReportModal = false
-                        }
-                    )
                 }
             }
         }

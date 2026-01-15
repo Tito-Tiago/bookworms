@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Star
@@ -63,7 +64,6 @@ fun ReviewFeedCard(
     modifier: Modifier = Modifier
 ) {
     var isSpoilerVisible by remember { mutableStateOf(!hasSpoiler) }
-
     var showReportModal by remember { mutableStateOf(false) }
     var showSuccessModal by remember { mutableStateOf(false) }
 
@@ -84,7 +84,7 @@ fun ReviewFeedCard(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable { onUserClick() } // Clique aqui
+                    modifier = Modifier.clickable { onUserClick() }
                 ) {
                     Icon(
                         imageVector = Icons.Default.AccountCircle,
@@ -147,7 +147,6 @@ fun ReviewFeedCard(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // LÓGICA DE SPOILER
                     if (!isSpoilerVisible) {
                         Column(
                             modifier = Modifier.fillMaxWidth(),
@@ -216,6 +215,17 @@ fun ReviewFeedCard(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
+
+                    Icon(
+                        imageVector = Icons.Default.Warning,
+                        contentDescription = null,
+                        tint = Color(0xFFD32F2F), // Vermelho
+                        modifier = Modifier
+                            .size(48.dp)
+                            .align(Alignment.CenterHorizontally)
+                            .padding(bottom = 16.dp)
+                    )
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -290,6 +300,15 @@ fun ReviewFeedCard(
                         .fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Icon(
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = null,
+                        tint = Color(0xFF388E3C), // Verde
+                        modifier = Modifier
+                            .size(64.dp)
+                            .padding(bottom = 16.dp)
+                    )
+
                     Text(
                         text = "Denuncia enviada",
                         style = MaterialTheme.typography.titleLarge,
