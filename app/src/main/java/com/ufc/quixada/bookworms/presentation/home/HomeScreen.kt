@@ -66,7 +66,15 @@ fun HomeScreen(
                         if (uiState.books.isEmpty() && uiState.searchQuery.isNotEmpty()) {
                             EmptyStateMessage("Nenhum livro encontrado.")
                         } else {
-                            BookListGrid(books = uiState.books, onBookClick = onBookClick)
+                            BookListGrid(
+                                books = uiState.books,
+                                onBookClick = { bookId ->
+                                    val book = uiState.books.find { it.bookId == bookId }
+                                    if (book != null) {
+                                        viewModel.onBookSelected(book, onBookClick)
+                                    }
+                                }
+                            )
                         }
                     }
                     SearchType.READERS -> {

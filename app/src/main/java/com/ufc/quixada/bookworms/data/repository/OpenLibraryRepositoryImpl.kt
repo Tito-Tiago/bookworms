@@ -51,18 +51,19 @@ class OpenLibraryRepositoryImpl @Inject constructor(
 
     override suspend fun getBookDetails(bookId: String): Result<Book> = coroutineScope {
         try {
-            val isWork = bookId.endsWith("W")
+            val cleanId = bookId.substringAfterLast("/")
+            val isWork = cleanId.endsWith("W")
             val endpoint = if (isWork) "works" else "books"
 
             val ratingsDeferred = async {
                 try {
-                    client.get("$detailsBase/works/$bookId/ratings.json").body<OpenLibraryRatingResponse>()
+                    client.get("$detailsBase/works/$cleanId/ratings.json").body<OpenLibraryRatingResponse>()
                 } catch (e: Exception) { null }
             }
 
             val detailsDeferred = async {
                 try {
-                    client.get("$detailsBase/$endpoint/$bookId.json").body<OpenLibraryBookDetailsDto>()
+                    client.get("$detailsBase/$endpoint/$cleanId.json").body<OpenLibraryBookDetailsDto>()
                 } catch (e: Exception) { null }
             }
 
