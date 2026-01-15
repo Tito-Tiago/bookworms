@@ -12,7 +12,6 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -39,7 +38,9 @@ import com.ufc.quixada.bookworms.presentation.public_profile.PublicProfileScreen
 @Composable
 fun MainScreen(
     onLogout: () -> Unit,
-    onBookClick: (String) -> Unit
+    onBookClick: (String) -> Unit,
+    onThemeSwitch: () -> Unit,
+    isDarkTheme: Boolean
 ) {
     val navController = rememberNavController()
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
@@ -65,7 +66,10 @@ fun MainScreen(
             composable(BottomNavItem.Feed.route) {
                 FeedScreen(
                     onBookClick = onBookClick,
-                    onUserClick = navigateToUserProfile
+                    onUserClick = navigateToUserProfile,
+                    onLogout = onLogout,
+                    onThemeSwitch = onThemeSwitch,
+                    isDarkTheme = isDarkTheme
                 )
             }
             // ---------------------
