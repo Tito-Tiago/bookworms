@@ -7,18 +7,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -33,28 +34,35 @@ fun ProfileScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
 
+    var canNavigateBack by remember { mutableStateOf(true) }
+
     LaunchedEffect(uiState.isLoggedOut) {
         if (uiState.isLoggedOut) {
             onLogout()
         }
     }
 
+    LaunchedEffect(uiState.isSaved) {
+        if (uiState.isSaved) {
+            if (canNavigateBack) {
+                canNavigateBack = false
+                onNavigateBack()
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Meu Perfil") },
+                title = { Text("Editar Perfil") }, // Título ajustado para "Editar"
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = {
+                        if (canNavigateBack) {
+                            canNavigateBack = false
+                            onNavigateBack()
+                        }
+                    }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "Voltar")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { viewModel.onLogoutClick() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                            contentDescription = "Sair",
-                            tint = MaterialTheme.colorScheme.error
-                        )
                     }
                 }
             )
@@ -118,12 +126,13 @@ fun ProfileScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     OutlinedTextField(
-                        value = uiState.user.turma ?: "",
-                        onValueChange = viewModel::onTurmaChange,
-                        label = { Text("Turma (Ex: 2º Ano A)") },
-                        leadingIcon = { Icon(Icons.Default.School, contentDescription = null) },
+                        value = uiState.user.bio ?: "",
+                        onValueChange = viewModel::onBioChange,
+                        label = { Text("Bio") },
+                        leadingIcon = { Icon(Icons.Default.Description, contentDescription = null) },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        singleLine = false,
+                        maxLines = 3
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
@@ -132,14 +141,6 @@ fun ProfileScreen(
                         Text(
                             text = uiState.errorMessage!!,
                             color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
-                    }
-
-                    if (uiState.successMessage != null) {
-                        Text(
-                            text = uiState.successMessage!!,
-                            color = Color(0xFF4CAF50), // Verde sucesso
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
                     }
