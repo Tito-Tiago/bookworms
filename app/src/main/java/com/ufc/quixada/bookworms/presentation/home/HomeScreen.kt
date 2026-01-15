@@ -68,11 +68,8 @@ fun HomeScreen(
                         } else {
                             BookListGrid(
                                 books = uiState.books,
-                                onBookClick = { bookId ->
-                                    val book = uiState.books.find { it.bookId == bookId }
-                                    if (book != null) {
-                                        viewModel.onBookSelected(book, onBookClick)
-                                    }
+                                onBookClick = { book ->
+                                    viewModel.onBookSelected(book, onBookClick)
                                 }
                             )
                         }
@@ -227,7 +224,7 @@ fun SearchBar(
 @Composable
 fun BookListGrid(
     books: List<Book>,
-    onBookClick: (String) -> Unit
+    onBookClick: (Book) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -244,12 +241,12 @@ fun BookListGrid(
 @Composable
 fun BookItem(
     book: Book,
-    onBookClick: (String) -> Unit
+    onBookClick: (Book) -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onBookClick(book.bookId) },
+            .clickable { onBookClick(book) },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(12.dp)
     ) {

@@ -34,13 +34,14 @@ class BookRepositoryImpl @Inject constructor(
 
     override suspend fun getBook(bookId: String): SingleBookResult {
         return try {
-            val localBook = bookDao.getBook(bookId)
+            val cleanId = bookId.substringAfterLast("/")
+            val localBook = bookDao.getBook(cleanId)
             if (localBook != null) {
                 return SingleBookResult.Success(mapEntityToDomain(localBook))
             }
 
             val document = firestore.collection("books")
-                .document(bookId)
+                .document(cleanId)
                 .get()
                 .await()
 
@@ -76,24 +77,27 @@ class BookRepositoryImpl @Inject constructor(
     }
 
     override suspend fun saveBook(book: Book) {
+        val cleanId = book.bookId.substringAfterLast("/")
+        val cleanBook = book.copy(bookId = cleanId)
+
         val entity = BookEntity(
-            bookId = book.bookId,
-            titulo = book.titulo,
-            autor = book.autor,
-            sinopse = book.sinopse,
-            capaUrl = book.capaUrl,
-            isbn = book.isbn,
-            notaMediaComunidade = book.notaMediaComunidade,
-            notaApiExterna = book.notaApiExterna,
-            fonteApi = book.fonteApi,
-            numAvaliacoes = book.numAvaliacoes
+            bookId = cleanBook.bookId,
+            titulo = cleanBook.titulo,
+            autor = cleanBook.autor,
+            sinopse = cleanBook.sinopse,
+            capaUrl = cleanBook.capaUrl,
+            isbn = cleanBook.isbn,
+            notaMediaComunidade = cleanBook.notaMediaComunidade,
+            notaApiExterna = cleanBook.notaApiExterna,
+            fonteApi = cleanBook.fonteApi,
+            numAvaliacoes = cleanBook.numAvaliacoes
         )
         bookDao.insertBook(entity)
 
         try {
             firestore.collection("books")
-                .document(book.bookId)
-                .set(book)
+                .document(cleanBook.bookId)
+                .set(cleanBook)
                 .await()
         } catch (e: Exception) {
             e.printStackTrace()
