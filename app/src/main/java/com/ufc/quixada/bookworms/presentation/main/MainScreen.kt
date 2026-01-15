@@ -32,7 +32,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.ufc.quixada.bookworms.presentation.feed.FeedScreen
 import com.ufc.quixada.bookworms.presentation.home.HomeScreen
 import com.ufc.quixada.bookworms.presentation.navigation.BottomNavItem
-import com.ufc.quixada.bookworms.presentation.notification.NotificationScreen
 import com.ufc.quixada.bookworms.presentation.profile.ProfileScreen
 import com.ufc.quixada.bookworms.presentation.public_profile.PublicProfileScreen
 
@@ -77,10 +76,6 @@ fun MainScreen(
                 )
             }
 
-            composable(BottomNavItem.Notifications.route) {
-                NotificationScreen()
-            }
-
             composable(
                 route = "public_profile/{userId}",
                 arguments = listOf(navArgument("userId") { type = NavType.StringType })
@@ -119,7 +114,6 @@ fun BottomBar(
     val items = listOf(
         BottomNavItem.Feed,
         BottomNavItem.Catalog,
-        BottomNavItem.Notifications,
         BottomNavItem.Profile
     )
 
