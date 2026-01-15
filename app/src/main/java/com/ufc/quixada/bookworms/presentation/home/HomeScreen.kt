@@ -66,7 +66,12 @@ fun HomeScreen(
                         if (uiState.books.isEmpty() && uiState.searchQuery.isNotEmpty()) {
                             EmptyStateMessage("Nenhum livro encontrado.")
                         } else {
-                            BookListGrid(books = uiState.books, onBookClick = onBookClick)
+                            BookListGrid(
+                                books = uiState.books,
+                                onBookClick = { book ->
+                                    viewModel.onBookSelected(book, onBookClick)
+                                }
+                            )
                         }
                     }
                     SearchType.READERS -> {
@@ -219,7 +224,7 @@ fun SearchBar(
 @Composable
 fun BookListGrid(
     books: List<Book>,
-    onBookClick: (String) -> Unit
+    onBookClick: (Book) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -236,12 +241,12 @@ fun BookListGrid(
 @Composable
 fun BookItem(
     book: Book,
-    onBookClick: (String) -> Unit
+    onBookClick: (Book) -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onBookClick(book.bookId) },
+            .clickable { onBookClick(book) },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(12.dp)
     ) {

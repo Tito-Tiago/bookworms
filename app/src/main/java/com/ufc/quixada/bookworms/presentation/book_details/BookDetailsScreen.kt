@@ -346,6 +346,7 @@ fun BookDetailsScreen(
                                     BookwormsButton(
                                         text = "Fazer resenha",
                                         onClick = { viewModel.onFazerResenhaClick() },
+                                        enabled = uiState.nota > 0,
                                         icon = painterResource(ic_teclado),
                                         iconContentDescription = "Icone de teclado",
                                         modifier = Modifier.padding(bottom = 4.dp)

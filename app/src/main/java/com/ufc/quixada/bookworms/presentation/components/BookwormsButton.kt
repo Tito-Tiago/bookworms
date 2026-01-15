@@ -25,12 +25,14 @@ fun BookwormsButton(
     icon: Painter? = null,
     iconContentDescription: String? = null,
     containerColor: Color? = null,
-    contentColor: Color? = null
+    contentColor: Color? = null,
+    enabled: Boolean = true
 ) {
     val defaultColors = ButtonDefaults.buttonColors()
 
     Button(
         onClick = onClick,
+        enabled = enabled,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
         colors = ButtonDefaults.buttonColors(

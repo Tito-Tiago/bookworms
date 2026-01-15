@@ -160,16 +160,6 @@ class BookDetailsViewModel @Inject constructor(
 
     fun onFazerResenhaClick() {
         val bookId = bookId ?: return //talves era massa colocar um erro
-        val currentRating = uiState.value.nota
-
-        if (currentRating < 1) {
-            _uiState.update {
-                it.copy(
-                    errorMessage = "Selecione uma nota entre 1 e 5 antes de enviar a resenha"
-                )
-            }
-            return
-        }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
