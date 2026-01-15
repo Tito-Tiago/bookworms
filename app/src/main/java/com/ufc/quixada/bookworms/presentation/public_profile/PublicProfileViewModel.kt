@@ -14,6 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -69,15 +70,25 @@ class PublicProfileViewModel @Inject constructor(
             )
 
             launch {
-                followRepository.getFollowersCountFlow(userId).collect { count ->
-                    _uiState.update { it.copy(followersCount = count) }
-                }
+                followRepository.getFollowersCountFlow(userId)
+                    .catch { e ->
+                        // Captura erro de permissão no logout e evita o crash
+                        android.util.Log.e("PublicProfileVM", "Erro no flow de seguidores: ${e.message}")
+                    }
+                    .collect { count ->
+                        _uiState.update { it.copy(followersCount = count) }
+                    }
             }
 
             launch {
-                followRepository.getFollowingCountFlow(userId).collect { count ->
-                    _uiState.update { it.copy(followingCount = count) }
-                }
+                followRepository.getFollowingCountFlow(userId)
+                    .catch { e ->
+                        // Captura erro de permissão no logout e evita o crash
+                        android.util.Log.e("PublicProfileVM", "Erro no flow de seguindo: ${e.message}")
+                    }
+                    .collect { count ->
+                        _uiState.update { it.copy(followingCount = count) }
+                    }
             }
 
             loadUserShelves()
