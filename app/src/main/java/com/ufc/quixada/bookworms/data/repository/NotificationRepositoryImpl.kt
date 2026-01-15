@@ -30,7 +30,7 @@ class NotificationRepositoryImpl @Inject constructor(
     }
 
     override suspend fun sendNotification(notification: Notification) {
-        val docId = if (notification.id.isNotBlank()) notification.id else "${notification.userId}_${notification.bookId}_${notification.senderId}"
+        val docId = notification.id.ifBlank { "${notification.userId}_${notification.bookId}_${notification.senderId}" }
         collection.document(docId).set(notification.copy(id = docId)).await()
     }
 

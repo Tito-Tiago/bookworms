@@ -59,7 +59,7 @@ class AddReviewUseCase @Inject constructor(
                 )
             )
 
-            val followers = followRepository.getFollowerUserIds(currentUser.uid)
+            val followers = followRepository.getFollowerUserIds(currentUser.uid).distinct()
             followers.forEach { followerId ->
                 val title = "Nova análise de ${currentUser.nome}"
                 val message = "Acabou de avaliar o livro $bookTitle"
@@ -74,7 +74,6 @@ class AddReviewUseCase @Inject constructor(
                         bookId = bookId
                     )
                 )
-                notificationHelper.showSystemNotification(title, message)
             }
         }
         return result
