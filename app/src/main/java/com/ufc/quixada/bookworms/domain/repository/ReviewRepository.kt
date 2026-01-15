@@ -23,4 +23,5 @@ interface ReviewRepository {
     suspend fun deleteReview(reviewId: String, bookId: String) : SimpleResult
     suspend fun getReviewsByUser(userId: String) : ReviewResult
     suspend fun getReviewById(reviewId: String) : SingleReviewResult
+    suspend fun getReviewsByUsers(userIds: List<String>) : ReviewResult
 }

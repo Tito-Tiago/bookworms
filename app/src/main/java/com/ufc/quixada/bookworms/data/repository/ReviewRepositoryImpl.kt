@@ -1,7 +1,7 @@
 package com.ufc.quixada.bookworms.data.repository
 
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.Query
 import com.ufc.quixada.bookworms.domain.model.Review
 import com.ufc.quixada.bookworms.domain.repository.ReviewRepository
 import com.ufc.quixada.bookworms.domain.repository.ReviewResult
@@ -150,6 +150,29 @@ class ReviewRepositoryImpl @Inject constructor(
             }
         } catch (e: Exception) {
             SingleReviewResult.Error(e.message ?: "Erro ao buscar review")
+        }
+    }
+
+    override suspend fun getReviewsByUsers(userIds: List<String>): ReviewResult {
+        return try {
+            if (userIds.isEmpty()) return ReviewResult.Success(emptyList())
+
+            val chunkOfUsers = userIds.take(10)
+
+            val snapshot = firestore.collection("reviews")
+                .whereIn("userId", chunkOfUsers)
+                .limit(20)
+                .get()
+                .await()
+
+            val reviews = snapshot.documents.mapNotNull { doc ->
+                doc.toObject(Review::class.java)?.copy(reviewId = doc.id)
+            }
+
+            ReviewResult.Success(reviews)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            ReviewResult.Error(e.message ?: "Erro ao buscar feed de reviews")
         }
     }
 }
