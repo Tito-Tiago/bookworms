@@ -333,6 +333,7 @@ fun BookDetailsScreen(
                                     ) {
                                         Checkbox(
                                             checked = uiState.contemSpoiler,
+                                            enabled = uiState.textoResenha.isNotBlank(),
                                             onCheckedChange = {
                                                 viewModel.toggleContemSpoiler()
                                             }

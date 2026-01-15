@@ -173,12 +173,28 @@ class BookDetailsViewModel @Inject constructor(
 
             when (result) {
                 is SingleReviewResult.Success -> {
-                    _uiState.update {
-                        it.copy(
+                    _uiState.update { currentState ->
+                        val updatedReviews = listOf(result.data) + currentState.reviews
+
+                        // Recalcula a nota média e quantidade de avaliações localmente
+                        val updatedBook = currentState.book?.let { book ->
+                            val currentCount = book.numAvaliacoes
+                            val currentAvg = book.notaMediaComunidade
+                            val newCount = currentCount + 1
+                            val newAvg = ((currentAvg * currentCount) + result.data.nota) / newCount
+                            book.copy(
+                                numAvaliacoes = newCount,
+                                notaMediaComunidade = newAvg
+                            )
+                        }
+
+                        currentState.copy(
                             isLoading = false,
                             textoResenha = "",
                             nota = 0,
-                            contemSpoiler = false
+                            contemSpoiler = false,
+                            reviews = updatedReviews,
+                            book = updatedBook
                         )
                     }
                 }
