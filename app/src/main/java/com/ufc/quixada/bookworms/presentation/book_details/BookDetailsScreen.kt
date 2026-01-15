@@ -231,7 +231,7 @@ fun BookDetailsScreen(
                             ) {
                                 Icon(Icons.Default.Star, null, tint = Color(0xFFFFD700), modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("${book.notaMediaComunidade}", fontWeight = FontWeight.Bold)
+                                Text("%.1f".format(book.notaMediaComunidade), fontWeight = FontWeight.Bold)
                             }
 
                             Button(
