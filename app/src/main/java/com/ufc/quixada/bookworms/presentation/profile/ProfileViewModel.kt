@@ -46,18 +46,23 @@ class ProfileViewModel @Inject constructor(
         _uiState.update { it.copy(user = it.user.copy(nome = newName), successMessage = null) }
     }
 
-    fun onTurmaChange(newTurma: String) {
-        _uiState.update { it.copy(user = it.user.copy(turma = newTurma), successMessage = null) }
+    fun onBioChange(newBio: String) {
+        _uiState.update { it.copy(user = it.user.copy(bio = newBio), successMessage = null) }
     }
 
     fun onSaveClick() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isSaving = true, errorMessage = null, successMessage = null) }
+            _uiState.update { it.copy(isSaving = true, errorMessage = null, successMessage = null, isSaved = false) }
 
             when (val result = updateProfileUseCase(_uiState.value.user)) {
                 is UserResult.Success -> {
                     _uiState.update {
-                        it.copy(isSaving = false, successMessage = "Perfil atualizado com sucesso!", user = result.data)
+                        it.copy(
+                            isSaving = false,
+                            successMessage = "Perfil atualizado com sucesso!",
+                            user = result.data,
+                            isSaved = true
+                        )
                     }
                 }
                 is UserResult.Error -> {
