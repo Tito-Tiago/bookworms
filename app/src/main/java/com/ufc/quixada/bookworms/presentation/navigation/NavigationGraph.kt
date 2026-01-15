@@ -5,11 +5,13 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.ufc.quixada.bookworms.presentation.auth.login.LoginScreen
 import com.ufc.quixada.bookworms.presentation.auth.register.RegisterScreen
 import com.ufc.quixada.bookworms.presentation.book_details.BookDetailsScreen
 import com.ufc.quixada.bookworms.presentation.main.MainScreen
 import com.ufc.quixada.bookworms.presentation.splash.SplashScreen
+import com.ufc.quixada.bookworms.presentation.splash.SplashViewModel
 import com.ufc.quixada.bookworms.presentation.public_profile.PublicProfileScreen
 
 sealed class Screen(val route: String) {
@@ -32,9 +34,15 @@ fun NavigationGraph(navController: androidx.navigation.NavHostController) {
         startDestination = Screen.Splash.route
     ) {
         composable(Screen.Splash.route) {
+            val splashViewModel: SplashViewModel = hiltViewModel()
             SplashScreen(
                 onTimeout = {
-                    navController.navigate(Screen.Login.route) {
+                    val destination = if (splashViewModel.isUserLoggedIn()) {
+                        Screen.Main.route
+                    } else {
+                        Screen.Login.route
+                    }
+                    navController.navigate(destination) {
                         popUpTo(Screen.Splash.route) { inclusive = true }
                     }
                 }
