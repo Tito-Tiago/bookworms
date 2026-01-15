@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -87,7 +85,9 @@ fun BookDetailsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
     var showShelfModal by remember { mutableStateOf(false) }
+    var showReportModal by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
+    val reportSheetState = rememberModalBottomSheetState()
 
     Scaffold(
         topBar = {
@@ -127,12 +127,10 @@ fun BookDetailsScreen(
                             .verticalScroll(scrollState),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // --- Área do Cabeçalho e Capa ---
                         Box(
                             contentAlignment = Alignment.TopCenter,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            // Fundo Verde (Header)
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -140,12 +138,10 @@ fun BookDetailsScreen(
                                     .background(MaterialTheme.colorScheme.primary)
                             )
 
-                            // Capa do Livro
                             Box(
                                 modifier = Modifier
                                     .padding(top = 100.dp)
                             ) {
-                                // Card da Capa
                                 Card(
                                     elevation = CardDefaults.cardElevation(12.dp),
                                     shape = RoundedCornerShape(16.dp),
@@ -177,7 +173,6 @@ fun BookDetailsScreen(
                                     }
                                 }
 
-                                // Botão de Favorito
                                 IconButton(
                                     onClick = { viewModel.onFavoriteClick() },
                                     modifier = Modifier
@@ -200,7 +195,6 @@ fun BookDetailsScreen(
 
                         Spacer(modifier = Modifier.height(32.dp))
 
-                        // --- Título e Autor ---
                         Text(
                             text = book.titulo,
                             style = MaterialTheme.typography.headlineMedium.copy(
@@ -225,7 +219,6 @@ fun BookDetailsScreen(
 
                         Spacer(modifier = Modifier.height(24.dp))
 
-                        // --- Nota / Avaliações ---
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -269,7 +262,6 @@ fun BookDetailsScreen(
 
                         Spacer(modifier = Modifier.height(32.dp))
 
-                        // --- Sinopse e Detalhes ---
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -294,7 +286,6 @@ fun BookDetailsScreen(
 
                             Spacer(modifier = Modifier.height(32.dp))
 
-                            // --- card de criar avaliação ---
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth(),
@@ -377,7 +368,7 @@ fun BookDetailsScreen(
                                                 bookName = it,
                                                 nota = review.nota,
                                                 textoResenha = review.textoResenha,
-                                                onTreeDotsClick = { },
+                                                onTreeDotsClick = { showReportModal = true },
                                                 contemSpoiler = review.contemSpoiler
                                             )
                                             Spacer(modifier = Modifier.height(24.dp))
@@ -395,7 +386,6 @@ fun BookDetailsScreen(
         }
     }
 
-    // modal adcionar a estante
     if (showShelfModal) {
         ModalBottomSheet(
             onDismissRequest = { showShelfModal = false },
@@ -448,12 +438,49 @@ fun BookDetailsScreen(
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                 TextButton(
-                    onClick = { /* Implementar HU-06 futuramente */ },
+                    onClick = { },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(Icons.Default.Add, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Adicionar uma nova estante")
+                }
+            }
+        }
+    }
+
+    if (showReportModal) {
+        ModalBottomSheet(
+            onDismissRequest = { showReportModal = false },
+            sheetState = reportSheetState
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 32.dp)
+            ) {
+                Text(
+                    text = "Denunciar Avaliação",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp)
+                )
+
+                val reportReasons = listOf(
+                    "Conteúdo Ofensivo",
+                    "Spam",
+                    "Spoiler não marcado",
+                    "Outro"
+                )
+
+                reportReasons.forEach { reason ->
+                    ListItem(
+                        headlineContent = { Text(reason) },
+                        modifier = Modifier.clickable {
+                            showReportModal = false
+                        }
+                    )
                 }
             }
         }
