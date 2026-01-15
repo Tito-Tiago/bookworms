@@ -96,8 +96,19 @@ class FollowRepositoryImpl @Inject constructor(
                 .whereEqualTo("userIdSeguidor", currentUserId)
                 .get()
                 .await()
-
             snapshot.documents.mapNotNull { it.getString("userIdSeguido") }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    override suspend fun getFollowerUserIds(userId: String): List<String> {
+        return try {
+            val snapshot = collection
+                .whereEqualTo("userIdSeguido", userId)
+                .get()
+                .await()
+            snapshot.documents.mapNotNull { it.getString("userIdSeguidor") }
         } catch (e: Exception) {
             emptyList()
         }

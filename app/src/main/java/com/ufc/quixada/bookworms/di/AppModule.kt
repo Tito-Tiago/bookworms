@@ -6,35 +6,19 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.ufc.quixada.bookworms.data.local.BookDatabase
 import com.ufc.quixada.bookworms.data.local.dao.BookDao
-import com.ufc.quixada.bookworms.data.repository.ActivityRepositoryImpl
-import com.ufc.quixada.bookworms.data.repository.AuthRepositoryImpl
-import com.ufc.quixada.bookworms.data.repository.BookRepositoryImpl
-import com.ufc.quixada.bookworms.data.repository.FavoriteRepositoryImpl
-import com.ufc.quixada.bookworms.data.repository.FollowRepositoryImpl
-import com.ufc.quixada.bookworms.data.repository.OpenLibraryRepositoryImpl
-import com.ufc.quixada.bookworms.data.repository.ReviewRepositoryImpl
-import com.ufc.quixada.bookworms.data.repository.ShelfRepositoryImpl
-import com.ufc.quixada.bookworms.data.repository.UserRepositoryImpl
-import com.ufc.quixada.bookworms.domain.repository.ActivityRepository
-import com.ufc.quixada.bookworms.domain.repository.AuthRepository
-import com.ufc.quixada.bookworms.domain.repository.BookRepository
-import com.ufc.quixada.bookworms.domain.repository.FavoriteRepository
-import com.ufc.quixada.bookworms.domain.repository.FollowRepository
-import com.ufc.quixada.bookworms.domain.repository.OpenLibraryRepository
-import com.ufc.quixada.bookworms.domain.repository.ReviewRepository
-import com.ufc.quixada.bookworms.domain.repository.ShelfRepository
-import com.ufc.quixada.bookworms.domain.repository.UserRepository
+import com.ufc.quixada.bookworms.data.repository.*
+import com.ufc.quixada.bookworms.domain.repository.*
+import com.ufc.quixada.bookworms.presentation.notification.NotificationHelper
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logging
-import io.ktor.serialization.kotlinx.json.json
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.logging.*
+import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 import javax.inject.Singleton
 
@@ -44,122 +28,74 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideFirebaseAuth(): FirebaseAuth {
-        return FirebaseAuth.getInstance()
-    }
+    fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
 
     @Provides
     @Singleton
-    fun provideFirebaseFirestore(): FirebaseFirestore {
-        return FirebaseFirestore.getInstance()
-    }
+    fun provideFirebaseFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
 
     @Provides
     @Singleton
-    fun provideAuthRepository(
-        auth: FirebaseAuth,
-        firestore: FirebaseFirestore
-    ): AuthRepository {
-        return AuthRepositoryImpl(auth, firestore)
-    }
+    fun provideAuthRepository(auth: FirebaseAuth, firestore: FirebaseFirestore): AuthRepository = AuthRepositoryImpl(auth, firestore)
 
     @Provides
     @Singleton
-    fun provideBookRepository(
-        firestore: FirebaseFirestore,
-        bookDao: BookDao
-    ): BookRepository {
-        return BookRepositoryImpl(firestore, bookDao)
-    }
+    fun provideBookRepository(firestore: FirebaseFirestore, bookDao: BookDao): BookRepository = BookRepositoryImpl(firestore, bookDao)
 
     @Provides
     @Singleton
-    fun provideUserRepository(
-        firestore: FirebaseFirestore
-    ): UserRepository {
-        return UserRepositoryImpl(firestore)
-    }
+    fun provideUserRepository(firestore: FirebaseFirestore): UserRepository = UserRepositoryImpl(firestore)
 
     @Provides
     @Singleton
-    fun provideFavoriteRepository(
-        firestore: FirebaseFirestore
-    ): FavoriteRepository {
-        return FavoriteRepositoryImpl(firestore)
-    }
+    fun provideFavoriteRepository(firestore: FirebaseFirestore): FavoriteRepository = FavoriteRepositoryImpl(firestore)
 
     @Provides
     @Singleton
-    fun provideFollowRepository(
-        firestore: FirebaseFirestore
-    ): FollowRepository {
-        return FollowRepositoryImpl(firestore)
-    }
+    fun provideFollowRepository(firestore: FirebaseFirestore): FollowRepository = FollowRepositoryImpl(firestore)
 
     @Provides
     @Singleton
-    fun provideShelfRepository(
-        firestore: FirebaseFirestore
-    ): ShelfRepository {
-        return ShelfRepositoryImpl(firestore)
-    }
+    fun provideShelfRepository(firestore: FirebaseFirestore): ShelfRepository = ShelfRepositoryImpl(firestore)
 
     @Provides
     @Singleton
-    fun provideReviewRepository(
-        firestore: FirebaseFirestore
-    ): ReviewRepository {
-        return ReviewRepositoryImpl(firestore)
-    }
-
-    // NOVO PROVIDER PARA ATIVIDADES
-    @Provides
-    @Singleton
-    fun provideActivityRepository(
-        firestore: FirebaseFirestore
-    ): ActivityRepository {
-        return ActivityRepositoryImpl(firestore)
-    }
+    fun provideReviewRepository(firestore: FirebaseFirestore): ReviewRepository = ReviewRepositoryImpl(firestore)
 
     @Provides
     @Singleton
-    fun provideOpenLibraryRepository(
-        client: HttpClient
-    ): OpenLibraryRepository {
-        return OpenLibraryRepositoryImpl(client)
-    }
+    fun provideActivityRepository(firestore: FirebaseFirestore): ActivityRepository = ActivityRepositoryImpl(firestore)
 
     @Provides
     @Singleton
-    fun provideHttpClient(): HttpClient {
-        return HttpClient(CIO) {
-            install(Logging) {
-                level = LogLevel.ALL
-            }
+    fun provideNotificationRepository(firestore: FirebaseFirestore): NotificationRepository = NotificationRepositoryImpl(firestore)
 
-            install(ContentNegotiation) {
-                json(Json {
-                    prettyPrint = true
-                    isLenient = true
-                    ignoreUnknownKeys = true
-                })
-            }
+    @Provides
+    @Singleton
+    fun provideNotificationHelper(@ApplicationContext context: Context): NotificationHelper = NotificationHelper(context)
+
+    @Provides
+    @Singleton
+    fun provideOpenLibraryRepository(client: HttpClient): OpenLibraryRepository = OpenLibraryRepositoryImpl(client)
+
+    @Provides
+    @Singleton
+    fun provideHttpClient(): HttpClient = HttpClient(CIO) {
+        install(Logging) { level = LogLevel.ALL }
+        install(ContentNegotiation) {
+            json(Json {
+                prettyPrint = true
+                isLenient = true
+                ignoreUnknownKeys = true
+            })
         }
     }
 
     @Provides
     @Singleton
-    fun provideBookDatabase(@ApplicationContext context: Context): BookDatabase {
-        return Room.databaseBuilder(
-            context,
-            BookDatabase::class.java,
-            "bookworms_db"
-        ).build()
-    }
+    fun provideBookDatabase(@ApplicationContext context: Context): BookDatabase = Room.databaseBuilder(context, BookDatabase::class.java, "bookworms_db").build()
 
     @Provides
     @Singleton
-    fun provideBookDao(database: BookDatabase): BookDao {
-        return database.bookDao
-    }
+    fun provideBookDao(database: BookDatabase): BookDao = database.bookDao
 }
