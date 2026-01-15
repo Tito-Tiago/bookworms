@@ -4,17 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ufc.quixada.bookworms.domain.model.Book
 import com.ufc.quixada.bookworms.domain.repository.BookResult
-// --- IMPORTS CORRIGIDOS ---
 import com.ufc.quixada.bookworms.domain.usecase.favorite.ManageFavoriteUseCase
 import com.ufc.quixada.bookworms.domain.usecase.book.SaveBookUseCase
-import com.ufc.quixada.bookworms.domain.usecase.book.SearchBooksUseCase // Assumindo estar junto com SaveBook
-import com.ufc.quixada.bookworms.domain.usecase.user.SearchUsersUseCase // Corrected package
-// --------------------------
+import com.ufc.quixada.bookworms.domain.usecase.book.SearchBooksUseCase
+import com.ufc.quixada.bookworms.domain.usecase.user.SearchUsersUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.update
@@ -32,23 +31,19 @@ class HomeViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-    // Controle de fluxo para a pesquisa (substitui o Job manual)
     private val queryFlow = MutableStateFlow("")
 
     init {
         observeQuery()
         observeFavorites()
-        // Busca inicial para não deixar a tela vazia
-        onSearchQueryChange("Harry Potter")
     }
 
-    // --- LÓGICA DE PESQUISA ---
 
     @OptIn(FlowPreview::class)
     private fun observeQuery() {
         viewModelScope.launch {
             queryFlow
-                .debounce(500) // Espera o usuário parar de digitar
+                .debounce(500)
                 .collectLatest { query ->
                     performSearch(query, _uiState.value.searchType)
                 }
@@ -63,7 +58,6 @@ class HomeViewModel @Inject constructor(
     fun onSearchTypeChange(newType: SearchType) {
         if (_uiState.value.searchType != newType) {
             _uiState.update { it.copy(searchType = newType) }
-            // Refaz a busca com o tipo novo e termo atual
             performSearch(_uiState.value.searchQuery, newType)
         }
     }
@@ -94,7 +88,6 @@ class HomeViewModel @Inject constructor(
                             _uiState.update { it.copy(isLoading = false, readers = users) }
                         },
                         onFailure = {
-                            // Em caso de erro na busca de usuários, apenas limpa a lista
                             _uiState.update { it.copy(isLoading = false, readers = emptyList()) }
                         }
                     )
@@ -103,17 +96,17 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-
-
     private fun observeFavorites() {
         viewModelScope.launch {
             manageFavoriteUseCase.observeFavorites()
+                .catch { e ->
+                    _uiState.update { it.copy(favoriteBookIds = emptySet()) }
+                }
                 .collect { favoriteIds ->
                     _uiState.update { it.copy(favoriteBookIds = favoriteIds.toSet()) }
                 }
         }
     }
-
 
     fun onBookSelected(book: Book, navigate: (String) -> Unit) {
         viewModelScope.launch {
