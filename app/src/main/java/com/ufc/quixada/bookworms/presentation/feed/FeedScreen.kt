@@ -42,12 +42,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.ufc.quixada.bookworms.domain.model.Activity
 import com.ufc.quixada.bookworms.domain.model.Book
-import com.ufc.quixada.bookworms.presentation.components.ReviewCard // Importação adicionada
+import com.ufc.quixada.bookworms.presentation.components.ReviewFeedCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedScreen(
     onBookClick: (String) -> Unit,
+    onUserClick: (String) -> Unit,
     viewModel: FeedViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -86,7 +87,6 @@ fun FeedScreen(
                 contentPadding = PaddingValues(bottom = 100.dp)
             ) {
 
-                // Seção: Em Alta
                 if (uiState.trendingBooks.isNotEmpty()) {
                     item {
                         SectionTitle(title = "Em Alta na Comunidade")
@@ -102,7 +102,6 @@ fun FeedScreen(
                     item { Spacer(modifier = Modifier.height(24.dp)) }
                 }
 
-                // Seção: Novidades
                 if (uiState.recentBooks.isNotEmpty()) {
                     item {
                         SectionTitle(title = "Novidades")
@@ -118,29 +117,25 @@ fun FeedScreen(
                     item { Spacer(modifier = Modifier.height(24.dp)) }
                 }
 
-                // ============================================
-                // NOVA SEÇÃO: Feed de Reviews (Amigos)
-                // ============================================
                 if (uiState.feedReviews.isNotEmpty()) {
                     item {
                         SectionTitle(title = "Resenhas dos Amigos")
                     }
                     items(uiState.feedReviews) { (review, book) ->
-                        Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                            ReviewCard(
-                                userName = review.userName,
-                                bookName = book?.titulo ?: "Livro Desconhecido",
-                                nota = review.nota,
-                                contemSpoiler = review.contemSpoiler,
-                                textoResenha = review.textoResenha,
-                                onTreeDotsClick = { /* Implementar menu se necessário */ }
-                            )
-                        }
+                        ReviewFeedCard(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            userName = review.userName,
+                            bookCoverUrl = book?.capaUrl,
+                            rating = review.nota.toDouble(),
+                            bookTitle = book?.titulo ?: "Livro Desconhecido",
+                            reviewText = review.textoResenha,
+                            hasSpoiler = review.contemSpoiler,
+                            onUserClick = { onUserClick(review.userId) } // Passa o clique com o ID do usuário
+                        )
                     }
                     item { Spacer(modifier = Modifier.height(24.dp)) }
                 }
 
-                // Seção: Outras Atividades (Opcional, se quiser manter)
                 if (uiState.activities.isNotEmpty()) {
                     item {
                         SectionTitle(title = "Outras Atividades")
@@ -149,7 +144,6 @@ fun FeedScreen(
                         ActivityItem(activity = activity, onBookClick = onBookClick)
                     }
                 } else if (uiState.feedReviews.isEmpty()) {
-                    // Mensagem vazia apenas se não tiver nem reviews nem activities
                     item {
                         Text(
                             text = "Nenhuma atividade recente ou você ainda não segue ninguém.",

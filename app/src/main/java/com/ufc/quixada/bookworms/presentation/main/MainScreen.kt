@@ -64,8 +64,12 @@ fun MainScreen(
                 .padding(innerPadding)
         ) {
             composable(BottomNavItem.Feed.route) {
-                FeedScreen(onBookClick = onBookClick)
+                FeedScreen(
+                    onBookClick = onBookClick,
+                    onUserClick = navigateToUserProfile
+                )
             }
+            // ---------------------
 
             composable(BottomNavItem.Catalog.route) {
                 HomeScreen(
@@ -91,7 +95,7 @@ fun MainScreen(
                     onEditClick = {
                         navController.navigate("profile_edit")
                     },
-                    onBookClick = onBookClick // Pass onBookClick to navigate to book details from shelf
+                    onBookClick = onBookClick
                 )
             }
 
