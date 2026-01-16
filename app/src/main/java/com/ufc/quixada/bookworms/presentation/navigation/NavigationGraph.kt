@@ -1,6 +1,7 @@
 package com.ufc.quixada.bookworms.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -13,6 +14,7 @@ import com.ufc.quixada.bookworms.presentation.main.MainScreen
 import com.ufc.quixada.bookworms.presentation.splash.SplashScreen
 import com.ufc.quixada.bookworms.presentation.splash.SplashViewModel
 import com.ufc.quixada.bookworms.presentation.public_profile.PublicProfileScreen
+import com.ufc.quixada.bookworms.presentation.profile.ProfileScreen
 
 sealed class Screen(val route: String) {
     data object Splash : Screen("splash")
@@ -28,7 +30,11 @@ sealed class Screen(val route: String) {
 }
 
 @Composable
-fun NavigationGraph(navController: androidx.navigation.NavHostController) {
+fun NavigationGraph(
+    navController: NavHostController,
+    isDarkTheme: Boolean,
+    onThemeSwitch: () -> Unit
+) {
     NavHost(
         navController = navController,
         startDestination = Screen.Splash.route
@@ -86,7 +92,9 @@ fun NavigationGraph(navController: androidx.navigation.NavHostController) {
                 },
                 onBookClick = { bookId ->
                     navController.navigate(Screen.BookDetails.createRoute(bookId))
-                }
+                },
+                isDarkTheme = isDarkTheme,
+                onThemeSwitch = onThemeSwitch
             )
         }
 
@@ -105,6 +113,19 @@ fun NavigationGraph(navController: androidx.navigation.NavHostController) {
                 },
                 onBookClick = { bookId ->
                     navController.navigate(Screen.BookDetails.createRoute(bookId))
+                }
+            )
+        }
+
+        composable("profile_edit") {
+            ProfileScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onLogout = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Main.route) { inclusive = true }
+                    }
                 }
             )
         }

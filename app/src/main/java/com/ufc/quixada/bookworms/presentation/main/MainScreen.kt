@@ -12,7 +12,6 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -33,14 +32,15 @@ import com.google.firebase.auth.FirebaseAuth
 import com.ufc.quixada.bookworms.presentation.feed.FeedScreen
 import com.ufc.quixada.bookworms.presentation.home.HomeScreen
 import com.ufc.quixada.bookworms.presentation.navigation.BottomNavItem
-import com.ufc.quixada.bookworms.presentation.notification.NotificationScreen
 import com.ufc.quixada.bookworms.presentation.profile.ProfileScreen
 import com.ufc.quixada.bookworms.presentation.public_profile.PublicProfileScreen
 
 @Composable
 fun MainScreen(
     onLogout: () -> Unit,
-    onBookClick: (String) -> Unit
+    onBookClick: (String) -> Unit,
+    onThemeSwitch: () -> Unit,
+    isDarkTheme: Boolean
 ) {
     val navController = rememberNavController()
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
@@ -64,18 +64,21 @@ fun MainScreen(
                 .padding(innerPadding)
         ) {
             composable(BottomNavItem.Feed.route) {
-                FeedScreen(onBookClick = onBookClick)
+                FeedScreen(
+                    onBookClick = onBookClick,
+                    onUserClick = navigateToUserProfile,
+                    onLogout = onLogout,
+                    onThemeSwitch = onThemeSwitch,
+                    isDarkTheme = isDarkTheme
+                )
             }
+            // ---------------------
 
             composable(BottomNavItem.Catalog.route) {
                 HomeScreen(
                     onBookClick = onBookClick,
                     onUserClick = navigateToUserProfile
                 )
-            }
-
-            composable(BottomNavItem.Notifications.route) {
-                NotificationScreen()
             }
 
             composable(
@@ -91,7 +94,7 @@ fun MainScreen(
                     onEditClick = {
                         navController.navigate("profile_edit")
                     },
-                    onBookClick = onBookClick // Pass onBookClick to navigate to book details from shelf
+                    onBookClick = onBookClick
                 )
             }
 
@@ -115,7 +118,6 @@ fun BottomBar(
     val items = listOf(
         BottomNavItem.Feed,
         BottomNavItem.Catalog,
-        BottomNavItem.Notifications,
         BottomNavItem.Profile
     )
 

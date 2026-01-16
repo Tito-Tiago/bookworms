@@ -45,11 +45,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -74,7 +78,7 @@ fun PublicProfileScreen(
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
-                viewModel.refreshShelves()
+                viewModel.refreshProfile()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -109,7 +113,6 @@ fun PublicProfileScreen(
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Avatar do Usuário
                     Box(
                         modifier = Modifier
                             .size(120.dp)
@@ -127,25 +130,33 @@ fun PublicProfileScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Nome do Usuário
                     Text(
                         text = uiState.user!!.nome,
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 0.5.sp
+                        )
                     )
 
-                    // Turma do Usuário
-                    uiState.user!!.turma?.let {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    uiState.user!!.bio?.let { bio ->
+                        if (bio.isNotBlank()) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = bio,
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontStyle = FontStyle.Italic,
+                                    lineHeight = 24.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(horizontal = 24.dp)
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Estatísticas
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
@@ -156,7 +167,6 @@ fun PublicProfileScreen(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Botões de Ação
                     if (uiState.isOwnProfile) {
                         Button(
                             onClick = onEditClick,
@@ -174,10 +184,8 @@ fun PublicProfileScreen(
                         Button(
                             onClick = { viewModel.onToggleFollowClick() },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (uiState.isFollowing)
-                                    MaterialTheme.colorScheme.secondary
-                                else
-                                    MaterialTheme.colorScheme.primary
+                                containerColor = if (uiState.isFollowing) Color(0xFF388E3C) else MaterialTheme.colorScheme.primary,
+                                contentColor = if (uiState.isFollowing) Color.White else MaterialTheme.colorScheme.onPrimary
                             ),
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -216,7 +224,6 @@ fun PublicProfileScreen(
                                 .align(Alignment.CenterHorizontally)
                         )
                     } else if (uiState.shelves.isEmpty() || uiState.shelves.all { it.books.isEmpty() }) {
-                        // Empty state
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -233,7 +240,6 @@ fun PublicProfileScreen(
                             )
                         }
                     } else {
-                        // Display shelves
                         Column(
                             modifier = Modifier.fillMaxWidth(),
                             verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -320,7 +326,6 @@ fun BookCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column {
-            // Book cover
             if (book.capaUrl != null) {
                 AsyncImage(
                     model = book.capaUrl,
@@ -347,7 +352,6 @@ fun BookCard(
                 }
             }
 
-            // Book title
             Text(
                 text = book.titulo,
                 style = MaterialTheme.typography.bodySmall,

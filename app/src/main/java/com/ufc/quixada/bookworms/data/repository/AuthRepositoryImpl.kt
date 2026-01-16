@@ -4,7 +4,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.ufc.quixada.bookworms.domain.model.User
-import com.ufc.quixada.bookworms.domain.model.UserRole
 import com.ufc.quixada.bookworms.domain.repository.AuthRepository
 import com.ufc.quixada.bookworms.domain.repository.AuthResult
 import kotlinx.coroutines.tasks.await
@@ -23,8 +22,7 @@ class AuthRepositoryImpl @Inject constructor(
             val user = User(
                 uid = firebaseUser.uid,
                 nome = nome,
-                email = email,
-                role = UserRole.ALUNO
+                email = email
             )
 
             firestore.collection("users")
@@ -78,8 +76,7 @@ class AuthRepositoryImpl @Inject constructor(
                 val newUser = User(
                     uid = firebaseUser.uid,
                     nome = firebaseUser.displayName ?: "Usuário Google",
-                    email = firebaseUser.email ?: "",
-                    role = UserRole.ALUNO
+                    email = firebaseUser.email ?: ""
                 )
                 firestore.collection("users")
                     .document(firebaseUser.uid)

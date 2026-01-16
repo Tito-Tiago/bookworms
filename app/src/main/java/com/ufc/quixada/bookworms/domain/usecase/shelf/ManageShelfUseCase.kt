@@ -3,6 +3,7 @@ package com.ufc.quixada.bookworms.domain.usecase.shelf
 import com.ufc.quixada.bookworms.domain.model.ShelfType
 import com.ufc.quixada.bookworms.domain.repository.AuthRepository
 import com.ufc.quixada.bookworms.domain.repository.ShelfRepository
+import com.ufc.quixada.bookworms.domain.repository.ShelfWithBooks
 import javax.inject.Inject
 
 class ManageShelfUseCase @Inject constructor(
@@ -17,5 +18,9 @@ class ManageShelfUseCase @Inject constructor(
     suspend fun getStatus(bookId: String): ShelfType? {
         val user = authRepository.getCurrentUser() ?: return null
         return shelfRepository.getBookShelfStatus(user.uid, bookId)
+    }
+
+    suspend fun getUserShelves(userId: String): Result<List<ShelfWithBooks>> {
+        return shelfRepository.getUserShelvesWithBooks(userId)
     }
 }

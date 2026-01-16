@@ -10,6 +10,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.ufc.quixada.bookworms.presentation.navigation.NavigationGraph
 import com.ufc.quixada.bookworms.presentation.ui.theme.BookwormsTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,9 +32,16 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
-            BookwormsTheme {
+            var isDarkTheme by remember { mutableStateOf(false) }
+
+            BookwormsTheme(darkTheme = isDarkTheme) {
                 val navController = rememberNavController()
-                NavigationGraph(navController = navController)
+
+                NavigationGraph(
+                    navController = navController,
+                    isDarkTheme = isDarkTheme,
+                    onThemeSwitch = { isDarkTheme = !isDarkTheme }
+                )
             }
         }
     }
