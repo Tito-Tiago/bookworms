@@ -6,12 +6,31 @@ import com.ufc.quixada.bookworms.domain.repository.UserRepository
 import com.ufc.quixada.bookworms.domain.repository.UserResult
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import com.ufc.quixada.bookworms.domain.repository.AuthRepository
 import android.util.Log
 
 class UserRepositoryImpl @Inject constructor(
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val authRepository: AuthRepository
 ) : UserRepository {
     private val usersCollection = firestore.collection("users")
+
+    override suspend fun saveFCMToken(token: String) {
+        val user = authRepository.getCurrentUser()
+        val userId = user?.uid
+        if (userId != null) {
+            try {
+                usersCollection.document(userId)
+                    .update("fcmToken", token)
+                    .await()
+                Log.d("UserRepositoryImpl", "FCM token saved for user $userId")
+            } catch (e: Exception) {
+                Log.e("UserRepositoryImpl", "Error saving FCM token for user $userId: ${e.message}")
+            }
+        } else {
+            Log.e("UserRepositoryImpl", "No current user to save FCM token")
+        }
+    }
 
     override suspend fun getUser(uid: String): UserResult {
         return try {

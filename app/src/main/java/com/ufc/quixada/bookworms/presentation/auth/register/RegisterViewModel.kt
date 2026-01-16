@@ -3,18 +3,22 @@ package com.ufc.quixada.bookworms.presentation.auth.register
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ufc.quixada.bookworms.domain.repository.AuthResult
+import com.ufc.quixada.bookworms.domain.repository.UserRepository
 import com.ufc.quixada.bookworms.domain.usecase.auth.RegisterUseCase
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
-    private val registerUseCase: RegisterUseCase
+    private val registerUseCase: RegisterUseCase,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RegisterUiState())
@@ -59,6 +63,7 @@ class RegisterViewModel @Inject constructor(
                 password = _uiState.value.password
             )) {
                 is AuthResult.Success -> {
+                    saveFCMToken()
                     _uiState.update {
                         it.copy(
                             isLoading = false,
@@ -76,6 +81,15 @@ class RegisterViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    private suspend fun saveFCMToken() {
+        try {
+            val token = FirebaseMessaging.getInstance().token.await()
+            userRepository.saveFCMToken(token)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 

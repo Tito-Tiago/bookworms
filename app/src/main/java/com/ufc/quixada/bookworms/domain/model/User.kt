@@ -8,7 +8,8 @@ data class User(
     val email: String = "",
     val turma: String? = null,
     val role: UserRole = UserRole.ALUNO,
-    val dataCadastro: Date = Date()
+    val dataCadastro: Date = Date(),
+    val fcmToken: String? = null
 )
 
 enum class UserRole {

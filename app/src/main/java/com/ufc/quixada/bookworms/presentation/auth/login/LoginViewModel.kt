@@ -7,19 +7,23 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.ufc.quixada.bookworms.domain.repository.AuthRepository
 import com.ufc.quixada.bookworms.domain.repository.AuthResult
+import com.ufc.quixada.bookworms.domain.repository.UserRepository
 import com.ufc.quixada.bookworms.domain.usecase.auth.LoginUseCase
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -42,6 +46,7 @@ class LoginViewModel @Inject constructor(
                 password = _uiState.value.password
             )) {
                 is AuthResult.Success -> {
+                    saveFCMToken()
                     _uiState.update {
                         it.copy(
                             isLoading = false,
@@ -62,6 +67,15 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    private suspend fun saveFCMToken() {
+        try {
+            val token = FirebaseMessaging.getInstance().token.await()
+            userRepository.saveFCMToken(token)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     fun onGoogleSignInResult(task: Task<GoogleSignInAccount>) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
@@ -71,6 +85,7 @@ class LoginViewModel @Inject constructor(
                 if (idToken != null) {
                     when (val result = authRepository.loginWithGoogle(idToken)) {
                         is AuthResult.Success -> {
+                            saveFCMToken()
                             _uiState.update { it.copy(isLoading = false, isLoginSuccessful = true) }
                         }
                         is AuthResult.Error -> {
