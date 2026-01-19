@@ -162,4 +162,12 @@ object AppModule {
     fun provideBookDao(database: BookDatabase): BookDao {
         return database.bookDao
     }
+
+    @Provides
+    @Singleton
+    fun provideNotificationManager(
+        @ApplicationContext context: Context
+    ): android.app.NotificationManager {
+        return context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+    }
 }
